@@ -56,7 +56,7 @@ int main(int argc, char* argv[]) {
 		printf("Not enove arguments\n!");
 		exit(EXIT_FAILURE);
 	}
-	char names[argc - 1][100];
+	char names[argc][100];
 	// make fifos
 	for(int i = 1; i < argc; i++) {
 		sprintf(names[i], "/tmp/%s", argv[i]);
@@ -113,6 +113,7 @@ int main(int argc, char* argv[]) {
 						printf("Error close\n");
 						return EXIT_FAILURE;
 					}
+					unlink(names[j + 1]);
 					num_open_fds--;
 				}
 			}
