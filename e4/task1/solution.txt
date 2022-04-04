@@ -4,8 +4,8 @@
     w - stands for write
     If the first char is a 'd', that indicates that it is a directory and not a file. 
 
-2. The first three chars represent the permissions of the current user. If a user has a permissions, it doesn't provide information about the privileges from other users. 
-   If a group has a certain privilege, every user, which belongs to it, has the permissions, which where assigned to this file to this group.
+2. The first three chars represent the permissions of the current user. If a user has permissions, it doesn't provide information about the privileges from other users. 
+   If a group has a certain privilege, every user, which belongs to it, has the permissions, which were assigned to this file to this group.
    'User' = owner/creator of the file 
 
 
@@ -19,7 +19,7 @@
     6 = 110 = rw- 
     4 = 100 = r--
 
-5. You change this by using chmod +permission or by a number. The permissions are represented by 3 bits (111), so if you want to give all privileges to a user/group you would do this by chmod 7 (7 = 111).
+5. You change this by using chmod +permission or by a number. The permissions are represented by 3 bits (111), so if you want to give all privileges to a user/group you would do this by  running chmod 7 (7 = 111).
 
 6. chmod -r <digit(s)> -r stands for recursive. 
 
@@ -28,4 +28,6 @@
 
 8. You can work with permissions, so that no one expects you can see the file(s).
 
-9. You could use unique names.  
+9. You could use unique names or use a different path. 
+
+
