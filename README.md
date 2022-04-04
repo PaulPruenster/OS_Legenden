@@ -1,6 +1,8 @@
 # Koene binarys auiloden!!
 
 net vergessn make clean zu mochen vorn comitten/pushen
-- [ ] Task1
+
+# Sheet 4
+- [x] Task1
 - [ ] Task2
 - [ ] Task3
