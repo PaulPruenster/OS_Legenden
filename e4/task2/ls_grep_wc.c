@@ -33,8 +33,7 @@ int main(void)
         printf("Fork error");
         exit(1);
     }
-    if (pid1 == 0) // Child1
-    {
+    if (pid1 == 0) { // Child1
         dup2(p1[1], STDOUT_FILENO);
         close_pipes(p1, p2);
  
@@ -49,8 +48,7 @@ int main(void)
         printf("Fork error");
         exit(1);
     }
-    if (pid2 == 0) // Child1
-    {
+    if (pid2 == 0) { // Child1
         dup2(p1[READ_END], STDIN_FILENO);
         dup2(p2[WRITE_END], STDOUT_FILENO);
         close_pipes(p1, p2);
@@ -63,13 +61,11 @@ int main(void)
 
     // Parent
     pid_t pid3 = fork();
-    if (pid3 < 0)
-    {
+    if (pid3 < 0) {
         printf("Fork error");
         exit(1);
     }
-    if (pid3 == 0) // Child2
-    {
+    if (pid3 == 0) { // Child2
         dup2(p2[READ_END], STDIN_FILENO);
         close_pipes(p1, p2);
 
@@ -81,6 +77,6 @@ int main(void)
     // Parent
     close_pipes(p1, p2);
 
-    wait(NULL);
+    wait(NULL); // TODO waitpid? olle 3
     return 0;
 }
