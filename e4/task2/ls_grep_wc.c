@@ -51,13 +51,13 @@ int main(void)
     }
     if (pid2 == 0) // Child1
     {
-        dup2(p1[READ_END], STDOUT_FILENO);
-        dup2(p2[WRITE_END], STDIN_FILENO);
+        dup2(p1[READ_END], STDIN_FILENO);
+        dup2(p2[WRITE_END], STDOUT_FILENO);
         close_pipes(p1, p2);
 
 
         // Uses the PATH variable, doesnt need the absolute path
-        execlp("grep", "grep", "-v", "ls");
+        execlp("grep", "grep", "-v", "lab");
         exit(1);
     }
 
@@ -70,7 +70,7 @@ int main(void)
     }
     if (pid3 == 0) // Child2
     {
-        dup2(p2[0], STDIN_FILENO);
+        dup2(p2[READ_END], STDIN_FILENO);
         close_pipes(p1, p2);
 
 
