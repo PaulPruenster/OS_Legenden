@@ -42,7 +42,7 @@ double evaluateString(char *src, bool *error){
 	double a, b;
 	a = strtod(src, &ptr1);
 	b = strtod((ptr1 + 1), &ptr2);
-	if (ptr1 + 1 == ptr2 || src+len == ptr2){
+	if (ptr1 + 1 == ptr2 || src+len != ptr2){
         *error = true; 
         return 0; 
     }
