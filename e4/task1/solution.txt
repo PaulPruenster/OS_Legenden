@@ -6,7 +6,8 @@
 
 2. The first three chars represent the permissions of the current user. If a user has permissions, it doesn't provide information about the privileges from other users. 
    If a group has a certain privilege, every user, which belongs to it, has the permissions, which were assigned to this file to this group.
-   'User' = owner/creator of the file 
+   'User' = owner/creator of the file. 
+   You should not give all privileges to all users/groups. 
 
 
 3. rwx 
@@ -15,15 +16,20 @@
    'w' = write
    'x' = execute
    
-4. Permissions are encoded as 3 Bits, so basically 111. 644
-    6 = 110 = rw- 
-    4 = 100 = r--
+4. Permissions are encoded as 3 Bits, so basically 111.
+   644
+   The first number corresponds to the user, so in this case 6.
+   The second number corresponds to the group, so in this case 4.
+   The third number corresponds to all, so in this case 4. 
+
+   6 = 110 = rw- 
+   4 = 100 = r--
 
 5. You change this by using chmod +permission or by a number. The permissions are represented by 3 bits (111), so if you want to give all privileges to a user/group you would do this by  running chmod 7 (7 = 111).
 
-6. chmod -r <digit(s)> -r stands for recursive. 
+6. chmod -<mode> -r <digits> -r stands for recursive. <mode> = user | group | all 
 
-7. umask returns the current standard permissions in octal.
+7. umask returns the current standard permissions, which get subtracted from 7 and then you get the "normal" Octal representation.
    If you add -S, it will return it as a string. 
 
 8. You can work with permissions, so that no one expects you can see the file(s).
