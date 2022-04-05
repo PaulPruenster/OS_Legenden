@@ -37,11 +37,12 @@ char *removeBlanks(char *input) {
 }
 double evaluateString(char *src, bool *error){
 	src = removeBlanks(src);
+	int len = strlen(src);
 	char *ptr1, *ptr2;
 	double a, b;
 	a = strtod(src, &ptr1);
 	b = strtod((ptr1 + 1), &ptr2);
-	if (ptr1 + 1 == ptr2){
+	if (ptr1 + 1 == ptr2 || src+len == ptr2){
         *error = true; 
         return 0; 
     }
