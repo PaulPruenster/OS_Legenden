@@ -1,11 +1,11 @@
-<
+from < to
+Redirect stdin
 
-
->
-
+from > to
+Redirect stdout
 
 2>
-
+Redirect stderr
 
 2>&1
-
+Reditrect to srderr (2>) AND stdout (&1)
