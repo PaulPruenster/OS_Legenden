@@ -16,9 +16,8 @@ int main(int argc, char *argv[])
 		printf("wrong amount of arguments!");
 		return EXIT_FAILURE;
 	}
-	char name[strlen(argv[1] + 10)];
+	char name[strlen(argv[1] + 5)];
 	sprintf(name, "/tmp/%s", argv[1]);
-	mkfifo(name, 0666);
 	int fd1;
 
 	char str1[80];

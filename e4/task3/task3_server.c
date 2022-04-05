@@ -63,13 +63,17 @@ int main(int argc, char *argv[]) {
 
 	if (argc < 2) {
 		printf("Not enough arguments\n!");
-		exit(EXIT_FAILURE);
+		return EXIT_FAILURE;
 	}
 	char names[argc][100];
-	// make fifos
+	/*
+		make fifos
+		starts with 1, 0 is the server's filename
+	*/
 	for (int i = 1; i < argc; i++) {
 		sprintf(names[i], "/tmp/%s", argv[i]);
-		mkfifo(names[i], 0666);
+		// only user can read/write on the fifos
+		mkfifo(names[i], 0600);
 	}
 
 	num_open_fds = nfds = argc - 1;
@@ -101,6 +105,7 @@ int main(int argc, char *argv[]) {
 			return EXIT_FAILURE;
 		}
 		for (int j = 0; j < nfds; j++) {
+			// really bad though, for some reason PIPE_BUF does work on my system, but somehow not on zid-gpl
 			char buf[1000] = {0};
 			if (pfds[j].revents != 0) {
 				if (pfds[j].revents & POLLIN) {
@@ -124,6 +129,7 @@ int main(int argc, char *argv[]) {
 						printf("Error close\n");
 						return EXIT_FAILURE;
 					}
+					//delete fifos
 					unlink(names[j + 1]);
 					num_open_fds--;
 				}
