@@ -3,6 +3,11 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
+/*
+    Inspired by:
+    https://serveanswer.com/questions/executing-the-ls-wc-linux-command-in-c-program-using-2-processes-communicating-trough-a-pipe
+*/
+
 void close_pipe(int* fd)
 {
     close(fd[0]);
