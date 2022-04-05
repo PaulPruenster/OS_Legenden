@@ -37,6 +37,10 @@ double evaluateString(char* src, bool * error) {
 	double a, b;
 	a = strtod(src, &ptr1);
 	b = strtod((ptr1 + 1), &ptr2);
+	if (ptr1 + 1 == ptr2){
+        *error = true; 
+        return 0; 
+    }
 	*error = false;
 	switch(ptr1[0]) {
 		case '+': return a + b;
