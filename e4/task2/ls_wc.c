@@ -3,6 +3,9 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
+#define READ_END 0
+#define WRITE_END 1
+
 /*
     Inspired by:
     https://serveanswer.com/questions/executing-the-ls-wc-linux-command-in-c-program-using-2-processes-communicating-trough-a-pipe
@@ -10,8 +13,8 @@
 
 void close_pipe(int* fd)
 {
-    close(fd[0]);
-    close(fd[1]);
+    close(fd[READ_END]);
+    close(fd[WRITE_END]);
 }
 
 int main(void)
@@ -29,7 +32,7 @@ int main(void)
     }
     if (pid1 == 0) // Child1
     {
-        dup2(fd[1], STDOUT_FILENO);
+        dup2(fd[WRITE_END], STDOUT_FILENO);
         close_pipe(fd);
 
         // Uses the PATH variable, doesnt need the absolute path
@@ -46,7 +49,7 @@ int main(void)
     }
     if (pid2 == 0) // Child2
     {
-        dup2(fd[0], STDIN_FILENO);
+        dup2(fd[READ_END], STDIN_FILENO);
         close_pipe(fd);
 
         execlp("wc", "wc", "-l", NULL);
