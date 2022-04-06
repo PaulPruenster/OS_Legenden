@@ -1,8 +1,9 @@
-1. Permissions:
-    x - stands for execute
-    r - stands for read
-    w - stands for write
+1. Permissions:                  in directory
+    x - stands for execute       same
+    r - stands for read          see files
+    w - stands for write         same
     If the first char is a 'd', that indicates that it is a directory and not a file. 
+    If the first char is a 'l' it is a link.
 
 2. The first three chars represent the permissions of the current user. If a user has permissions, it doesn't provide information about the privileges from other users. 
    If a group has a certain privilege, every user, which belongs to it, has the permissions, which were assigned to this file to this group.
@@ -25,12 +26,14 @@
    6 = 110 = rw- 
    4 = 100 = r--
 
-5. You change this by using chmod +permission or by a number. The permissions are represented by 3 bits (111), so if you want to give all privileges to a user/group you would do this by  running chmod 7 (7 = 111).
+5. You change this by using chmod +permission or by a number. The permissions are represented by 3 bits (111), so if you want to give all privileges to a user/group you would do this by running chmod 777 (7 = 111).
 
 6. chmod -<mode> -r <digits> -r stands for recursive. <mode> = user | group | all 
+   You need execution rights for the folder in order to do it. 
 
 7. umask returns the current standard permissions, which get subtracted from 7 and then you get the "normal" Octal representation.
    If you add -S, it will return it as a string. 
+   It doesn't mather, whether the first digit is a 0 or 1, because execute-permission get ignored by this mask. 
 
 8. You can work with permissions, so that no one expects you can see the file(s).
 
