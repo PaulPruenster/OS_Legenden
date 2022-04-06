@@ -23,6 +23,10 @@ int main(int argc, char *argv[])
 	char str1[80];
 	int finish = 1;
 	fd1 = open(name, O_WRONLY);
+	if (fd1 == -1){
+		printf("pipe not found\n");
+		return EXIT_FAILURE;
+	}
 	while (finish)
 	{
 		// string taken from user.
