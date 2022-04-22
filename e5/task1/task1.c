@@ -50,7 +50,7 @@ void reader(uint64_t n, uint64_t b)
 			sum += buffer[i];
 		}
 	}
-	printf("Result: %ld\n", sum);
+	printf("Result: %llu\n", sum);
 	free(buffer);
 }
 
@@ -116,7 +116,8 @@ int main(int argc, char *argv[])
 	uint64_t n = strtol(argv[1], &end1, 10);
 	uint64_t b = strtol(argv[2], &end2, 10);
 
-	pid_t writer_proc, reader_proc;
+	pid_t writer_proc = 0; 
+	pid_t reader_proc = 0;
 	// https://stackoverflow.com/questions/6542491/how-to-create-two-processes-from-a-single-parent
 	(writer_proc = fork()) && (reader_proc = fork());
 	if (reader_proc == -1 || writer_proc == -1)
