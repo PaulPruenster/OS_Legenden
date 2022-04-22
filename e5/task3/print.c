@@ -14,17 +14,13 @@
 
 struct message {
 	char data[1000];
+	bool quit;
 };
 typedef struct message message;
 
 int main(int argc, char* argv[]) {
-
-	//message msg1;
-	// strcpy(msg1.data, argv[3]);
-	// printf("%s\n",msg1.data);
 	
-	EXIT_SUCCESS;
-	if(argc != 4) {
+	if(argc != 3) {
 		printf("wrong amount of arguments!\n");
 		return EXIT_FAILURE;
 	}
@@ -34,10 +30,10 @@ int main(int argc, char* argv[]) {
 		return EXIT_FAILURE;
 	}
 	message msg = {0};
-	strcpy(msg.data, argv[3]);
-	//printf("%s\n", msg.data);
-	//msg.data = argv[3];
-	printf("%s", msg.data);
+	fgets( msg.data, 1000, stdin);
+	if(msg.data[0] == '\n'){
+		msg.quit = true;
+	}
 	mq_send(mq, (const char*)&msg, sizeof(msg), atoi(argv[2]));
 	mq_close(mq);
 }
