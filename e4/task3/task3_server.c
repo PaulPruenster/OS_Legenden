@@ -88,7 +88,7 @@ int main(int argc, char *argv[]) {
 		pfds[j].fd = open(names[j + 1], O_RDONLY);
 		if (pfds[j].fd == -1) {
 			printf("could not connect to %s\n", argv[j + 1]);
-			num_open_fds--;
+			num_open_fds--; // decrease nfds
 		}
 		printf("%s connected.\n", argv[j + 1]);
 		clients[j].name = argv[j + 1];
@@ -136,7 +136,7 @@ int main(int argc, char *argv[]) {
 			}
 		}
 	}
-
+	free(pfds);
 	printf("All closed\n");
 	return EXIT_SUCCESS;
 }

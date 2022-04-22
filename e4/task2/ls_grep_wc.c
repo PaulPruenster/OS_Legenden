@@ -76,5 +76,7 @@ int main(void)
     close_pipes(p1, p2);
 
     wait(NULL); // TODO waitpid? olle 3
+                // exec if success, closes all pipes, otherwise you need to close all pipes. 
+                // exec gets same pid
     return 0;
 }

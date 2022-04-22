@@ -15,6 +15,7 @@ const int msgssize = 1000;
 
 struct message {
 	char data[1000];
+	bool quit; 
 };
 typedef struct message message;
 
@@ -57,7 +58,11 @@ int main(int argc, char* argv[]) {
 			putc(a, stdout);
 			a = msg.data[++i];
 		}
+
 		printf("\n");
+		if (msg.quit == true){
+			continue; 
+		}
 		if(msg.data[0] == '\0') {
 			printf("Shutting down\n");
 			finish = false;
