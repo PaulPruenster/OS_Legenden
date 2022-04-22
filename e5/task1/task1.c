@@ -9,7 +9,7 @@
 #include <unistd.h>
 #include <stdint.h>
 
-// TODO: Test on ZID
+// TODO: Fix on ZID (hin)
 
 void reader(uint64_t n, uint64_t b)
 {
