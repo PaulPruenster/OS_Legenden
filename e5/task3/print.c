@@ -14,7 +14,6 @@
 
 struct message {
 	char data[1000];
-	bool quit;
 };
 typedef struct message message;
 
@@ -24,6 +23,7 @@ int main(int argc, char* argv[]) {
 	// strcpy(msg1.data, argv[3]);
 	// printf("%s\n",msg1.data);
 	
+	EXIT_SUCCESS;
 	if(argc != 4) {
 		printf("wrong amount of arguments!\n");
 		return EXIT_FAILURE;
@@ -38,7 +38,6 @@ int main(int argc, char* argv[]) {
 	//printf("%s\n", msg.data);
 	//msg.data = argv[3];
 	printf("%s", msg.data);
-	message msg = { .quit = true };
-	if (mq_send(mq, (const char*)&msg, sizeof(msg), atoi(argv[2])) != 0) return;
+	mq_send(mq, (const char*)&msg, sizeof(msg), atoi(argv[2]));
 	mq_close(mq);
 }

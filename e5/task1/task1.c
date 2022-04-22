@@ -6,6 +6,8 @@
 #include <sys/mman.h>
 #include <unistd.h>
 
+// TODO: Test on ZID
+
 void reader(uint64_t n, uint64_t b) {
 	const char* name = "/asdf";
 	const int oflag = O_RDWR; // open read+write

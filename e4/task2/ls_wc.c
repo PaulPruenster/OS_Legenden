@@ -49,12 +49,11 @@ int main(void)
     }
     if (pid2 == 0) // Child2
     {
-        dup2(fd[READ_END], STDIN_FILENO);   // dup2(fd1, fd2) fd1 gets cloned to fd2
-                                            // otherwise (worse) close(fd2); dup(fd1);
+        dup2(fd[READ_END], STDIN_FILENO);
         close_pipe(fd);
 
         execlp("wc", "wc", "-l", NULL);
-        exit(1); // never gets executed; 
+        exit(1);
     }
 
     // Parent
