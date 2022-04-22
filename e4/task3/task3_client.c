@@ -16,7 +16,7 @@ int main(int argc, char *argv[])
 		printf("wrong amount of arguments!");
 		return EXIT_FAILURE;
 	}
-	char name[strlen(argv[1] + 5)];
+	char name[strlen(argv[1] ) + 5];
 	sprintf(name, "/tmp/%s", argv[1]);
 	int fd1;
 
