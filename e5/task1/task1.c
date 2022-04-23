@@ -13,7 +13,7 @@
 
 void reader(uint64_t n, uint64_t b)
 {
-	const char *name = "/asdf";
+	const char *name = "/jklp";
 	const int oflag = O_RDWR; // open read+write
 	const int fd = shm_open(name, oflag, 0);
 	if (fd < 0)
@@ -56,7 +56,7 @@ void reader(uint64_t n, uint64_t b)
 
 void writer(uint64_t n, uint64_t b)
 {
-	const char *name = "/asdf";									 // change the name if it already exists
+	const char *name = "/jklp";									 // change the name if it already exists
 	const int oflag = O_CREAT | O_EXCL | O_RDWR; // create, fail if exists, read+write
 	const mode_t permission = S_IRUSR | S_IWUSR; // 600
 	const int fd = shm_open(name, oflag, permission);
@@ -94,7 +94,7 @@ void writer(uint64_t n, uint64_t b)
 	}
 	memcpy(shared_mem, content, shared_mem_size * sizeof(uint64_t));
 
-	sleep(200 * 1000 * 1000); // Give reader a chance to read the message
+	sleep(200 * 1000); // Give reader a chance to read the message
 
 	munmap(shared_mem, shared_mem_size);
 	close(fd);
@@ -111,32 +111,37 @@ int main(int argc, char *argv[])
 	}
 
 	char *end1 = NULL;
-	char *end2 = NULL;
+	char *end2 = NULL; 
 
 	uint64_t n = strtol(argv[1], &end1, 10);
 	uint64_t b = strtol(argv[2], &end2, 10);
 
-	pid_t writer_proc = 0; 
-	pid_t reader_proc = 0;
+	writer(n,b);
+	sleep(100 * 100 * 100);
+	reader(n, b);
+
+	//pid_t writer_proc, reader_proc;
 	// https://stackoverflow.com/questions/6542491/how-to-create-two-processes-from-a-single-parent
+	/*
 	(writer_proc = fork()) && (reader_proc = fork());
 	if (reader_proc == -1 || writer_proc == -1)
 		return EXIT_FAILURE;
 
-	if (reader_proc == 0)
+	if (writer_proc == 0)
 	{
-		reader(n, b);
+		writer(n, b);
 	}
-	else if (writer_proc == 0)
+	else if (reader_proc == 0)
 	{
 		wait(NULL);
-		writer(n, b);
+		reader(n, b);		
 	}
 	else
 	{
 		wait(NULL);
 		return EXIT_SUCCESS;
 	}
+	*/
 }
 
 /*	Observations:
