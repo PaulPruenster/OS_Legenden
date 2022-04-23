@@ -1,0 +1,6 @@
+{
+  "files.associations": {
+    "mman.h": "c",
+    "stat.h": "c"
+  }
+}

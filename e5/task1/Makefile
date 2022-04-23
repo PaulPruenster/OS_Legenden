@@ -8,7 +8,4 @@ clean:
 	$(RM) task1.o task1
 
 task1: task1.c
-	$(CC) $(CFLAGS) -o $@ $^ 
-
-test: asdf.c
-	$(CC) $(CFLAGS) -o $@ $^
+	$(CC) $(CFLAGS) -o $@ $^ -lrt
