@@ -8,4 +8,4 @@ clean:
 	$(RM) task2.o task2
 
 task2: task2.c
-	$(CC) $(CFLAGS) -o $@ $^ -lrt
+	$(CC) $(CFLAGS) -o $@ $^ -lrt -pthread

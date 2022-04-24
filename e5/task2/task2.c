@@ -9,12 +9,15 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/wait.h>
+#include <semaphore.h>
 
 struct data
 {
   int fd;
   uint64_t *shared_mem;
 };
+
+sem_t sema;
 
 struct data *allocate_ring_buff(const char *name, uint64_t b)
 {
@@ -50,27 +53,11 @@ struct data *allocate_ring_buff(const char *name, uint64_t b)
   return structdata;
 }
 
-uint64_t reader(uint64_t n, uint64_t b, struct data *structdata)
-{
-  uint64_t sum = 0;
-  for (uint64_t i = 0; i < n; ++i)
-  {
-    if (n > b)
-    {
-      sum += structdata->shared_mem[i % b];
-    }
-    else
-    {
-      sum += structdata->shared_mem[i];
-    }
-  }
-  return sum;
-}
-
 void writer(uint64_t n, uint64_t b, struct data *structdata)
 {
   for (uint64_t i = 0; i < n; ++i)
   {
+    sem_wait(&sema);
     if (n > b)
     {
       structdata->shared_mem[i % b] = i + 1;
@@ -79,8 +66,27 @@ void writer(uint64_t n, uint64_t b, struct data *structdata)
     {
       structdata->shared_mem[i] = i + 1;
     }
+    sem_post(&sema);
   }
-  // usleep(200 * 1000); // Give reader a chance to read the message
+}
+
+uint64_t reader(uint64_t n, uint64_t b, struct data *structdata)
+{
+  uint64_t sum = 0;
+  for (uint64_t i = 0; i < n; ++i)
+  {
+    sem_wait(&sema);
+    if (n > b)
+    {
+      sum += structdata->shared_mem[i % b];
+    }
+    else
+    {
+      sum += structdata->shared_mem[i];
+    }
+    sem_post(&sema);
+  }
+  return sum;
 }
 
 int main(int argc, char **argv)
@@ -99,6 +105,8 @@ int main(int argc, char **argv)
 
   const char *name = "/csaz9802shared_memoryasass";
   struct data *structdata = allocate_ring_buff(name, b);
+
+  sem_init(&sema, 0, 1);
 
   const pid_t writer_proc = fork();
   if (writer_proc == -1)
@@ -125,6 +133,7 @@ int main(int argc, char **argv)
   close(structdata->fd);
   free(structdata);
   shm_unlink(name);
+  sem_destroy(&sema);
 }
 
 /*	Observations:
