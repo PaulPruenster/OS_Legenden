@@ -116,8 +116,9 @@ int main(int argc, char **argv)
 	if (writer_proc == 0)
 	{
 		writer(n, b, structdata);
+		exit(0); // hot gfahlt also hot sein kind a nomol geforkt
 	}
-	wait(0);
+	// wait(0);
 	const pid_t reader_proc = fork();
 
 	if (reader_proc == -1)
