@@ -1,10 +1,14 @@
-#include <fcntl.h>
-#include <inttypes.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <inttypes.h>
+#include <fcntl.h>
 #include <sys/mman.h>
+#include <sys/stat.h>
 #include <unistd.h>
+#include <sys/types.h>
+#include <sys/wait.h>
 
 struct data
 {
@@ -12,7 +16,7 @@ struct data
   uint64_t *shared_mem;
 };
 
-void *allocate_ring_buff(const char *name, uint64_t b)
+struct data *allocate_ring_buff(const char *name, uint64_t b)
 {
 
   const int oflag = O_CREAT | O_EXCL | O_RDWR;
@@ -39,8 +43,11 @@ void *allocate_ring_buff(const char *name, uint64_t b)
     perror("mmap");
     return NULL;
   }
-  struct data structdata = {.fd = fd, .shared_mem = shared_mem};
-  return &structdata;
+  struct data *structdata = malloc(sizeof(structdata));
+  structdata->fd = fd;
+  structdata->shared_mem = shared_mem;
+
+  return structdata;
 }
 
 uint64_t reader(uint64_t n, uint64_t b, struct data *structdata)
@@ -112,10 +119,11 @@ int main(int argc, char **argv)
     printf("%lu", reader(n, b, structdata));
     exit(0);
   }
-  wait();
+  wait(0);
 
   munmap(structdata->shared_mem, b * sizeof(uint64_t));
   close(structdata->fd);
+  free(structdata);
   shm_unlink(name);
 }
 
