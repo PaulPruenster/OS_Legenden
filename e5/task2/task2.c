@@ -11,15 +11,15 @@
 #include <sys/wait.h>
 #include <semaphore.h>
 
-struct data
+typedef struct data
 {
   int fd;
   uint64_t *shared_mem;
-};
+  sem_t write;
+  sem_t consume;
+} ThreadData;
 
-sem_t sema;
-
-struct data *allocate_ring_buff(const char *name, uint64_t b)
+ThreadData *allocate_ring_buff(const char *name, uint64_t b)
 {
 
   const int oflag = O_CREAT | O_EXCL | O_RDWR;
@@ -46,45 +46,45 @@ struct data *allocate_ring_buff(const char *name, uint64_t b)
     perror("mmap");
     return NULL;
   }
-  struct data *structdata = malloc(sizeof(structdata));
+  ThreadData *structdata = malloc(sizeof(structdata));
   structdata->fd = fd;
   structdata->shared_mem = shared_mem;
 
   return structdata;
 }
 
-void writer(uint64_t n, uint64_t b, struct data *structdata)
+void writer(uint64_t n, uint64_t b, ThreadData *data)
 {
   for (uint64_t i = 0; i < n; ++i)
   {
-    sem_wait(&sema);
+    sem_wait(&data->consume);
     if (n > b)
     {
-      structdata->shared_mem[i % b] = i + 1;
+      data->shared_mem[i % b] = i + 1;
     }
     else
     {
-      structdata->shared_mem[i] = i + 1;
+      data->shared_mem[i] = i + 1;
     }
-    sem_post(&sema);
+    sem_post(&data->write);
   }
 }
 
-uint64_t reader(uint64_t n, uint64_t b, struct data *structdata)
+uint64_t reader(uint64_t n, uint64_t b, struct data *data)
 {
   uint64_t sum = 0;
   for (uint64_t i = 0; i < n; ++i)
   {
-    sem_wait(&sema);
+    sem_wait(&data->write);
     if (n > b)
     {
-      sum += structdata->shared_mem[i % b];
+      sum += data->shared_mem[i % b];
     }
     else
     {
-      sum += structdata->shared_mem[i];
+      sum += data->shared_mem[i];
     }
-    sem_post(&sema);
+    sem_post(&data->consume);
   }
   return sum;
 }
@@ -104,9 +104,10 @@ int main(int argc, char **argv)
   uint64_t b = strtol(argv[2], &end2, 10);
 
   const char *name = "/csaz9802shared_memoryasass";
-  struct data *structdata = allocate_ring_buff(name, b);
+  ThreadData *data = allocate_ring_buff(name, b);
 
-  sem_init(&sema, 0, 1);
+  sem_init(&data->write, 0, 1);
+  sem_init(&data->consume, 0, 1);
 
   const pid_t writer_proc = fork();
   if (writer_proc == -1)
@@ -114,7 +115,7 @@ int main(int argc, char **argv)
 
   if (writer_proc == 0)
   {
-    writer(n, b, structdata);
+    writer(n, b, data);
     exit(0);
   }
 
@@ -124,16 +125,17 @@ int main(int argc, char **argv)
 
   if (reader_proc == 0)
   {
-    printf("%lu", reader(n, b, structdata));
+    printf("%lu", reader(n, b, data));
     exit(0);
   }
   wait(0);
 
-  munmap(structdata->shared_mem, b * sizeof(uint64_t));
-  close(structdata->fd);
-  free(structdata);
+  munmap(data->shared_mem, b * sizeof(uint64_t));
+  close(data->fd);
   shm_unlink(name);
-  sem_destroy(&sema);
+  sem_destroy(&data->write);
+  sem_destroy(&data->consume);
+  free(data);
 }
 
 /*	Observations:
