@@ -55,6 +55,16 @@ ThreadData *allocate_ring_buff(uint64_t b)
   return structdata;
 }
 
+void free_data(uint64_t b, ThreadData *data)
+{
+  munmap(data->shared_mem, b * sizeof(uint64_t));
+  close(data->fd);
+  shm_unlink(&data->name);
+  sem_destroy(&data->write);
+  sem_destroy(&data->consume);
+  free(data);
+}
+
 void writer(uint64_t n, uint64_t b, ThreadData *data)
 {
   for (uint64_t i = 0; i < n; ++i)
@@ -117,6 +127,7 @@ int main(int argc, char **argv)
   if (writer_proc == 0)
   {
     writer(n, b, data);
+    free_data(b, data);
     exit(0);
   }
 
@@ -127,16 +138,12 @@ int main(int argc, char **argv)
   if (reader_proc == 0)
   {
     printf("%lu", reader(n, b, data));
+    free_data(b, data);
     exit(0);
   }
   wait(0);
 
-  munmap(data->shared_mem, b * sizeof(uint64_t));
-  close(data->fd);
-  shm_unlink(&data->name);
-  sem_destroy(&data->write);
-  sem_destroy(&data->consume);
-  free(data);
+  free_data(b, data);
 }
 
 /*	Observations:
