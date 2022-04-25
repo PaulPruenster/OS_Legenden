@@ -116,3 +116,14 @@ int main (int argc, char * argv[]){
 
 	return EXIT_SUCCESS;
 }
+/*	Observations:
+ *  -> If you quit your program clean (close and unlink the file/shared memory segment)
+ *     you can get the correct answer if you are a lucky and n < b. But there is a problem, if N > B you have
+ *     to use the ring buffer. Due to the implementation, the ring buffer doesn't work
+ *     as expected, because it doesn't wait for the reader to read the value and then
+ *     overrides it. It overrides it, nevertheless the reader has read it or not.
+ *
+ *  -> If you try really large numbers for N and B, it is likely to run into an overflow or even the
+ *     program will crash, due to a too big number and end in an SIGSEV.
+ * 
+ */
