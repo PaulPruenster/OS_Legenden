@@ -1,159 +1,137 @@
-#include <stddef.h>
 #include <stdio.h>
+#include <stdint.h>
 #include <stdlib.h>
-#include <string.h>
 #include <fcntl.h>
 #include <sys/mman.h>
+#include <unistd.h>
 #include <sys/stat.h>
 #include <sys/wait.h>
-#include <unistd.h>
-#include <stdint.h>
 
-// TODO: Fix on ZID (hin)
 
-void reader(uint64_t n, uint64_t b)
-{
-	const char *name = "/jklp";
-	const int oflag = O_RDWR; // open read+write
-	const int fd = shm_open(name, oflag, 0);
-	if (fd < 0)
-	{
-		// This fails on compiler explorer, but works on a normal system
+void writer(uint64_t n, uint64_t b, uint64_t shared_mem_size, const char * name){
+
+	const int fd = shm_open(name, O_RDWR, S_IRUSR | S_IWUSR);
+
+	if (fd < 0) {
 		perror("shm_open");
 		return;
 	}
 
-	const uint64_t shared_mem_size = n;
-	uint64_t *shared_mem = mmap(NULL, shared_mem_size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
-	if (shared_mem == MAP_FAILED)
-	{
+	uint64_t * shared_mem = mmap(NULL, shared_mem_size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+
+	if (shared_mem == MAP_FAILED){
 		perror("mmap");
 		return;
 	}
 
-	uint64_t *buffer = calloc(b, sizeof(uint64_t) * shared_mem_size);
-	memcpy(buffer, shared_mem, shared_mem_size * sizeof(uint64_t));
+	for (uint64_t i = 0; i < n; ++i) {
+		if (n >= b){
+			shared_mem[i % b] = i + 1;
+		} else{
+			shared_mem[i] = i + 1;
+		}
+	}
 
 	munmap(shared_mem, shared_mem_size);
 	close(fd);
-	shm_unlink(name);
-
-	uint64_t sum = 0;
-	for (uint64_t i = 0; i < n; ++i)
-	{
-		if (n > b)
-		{
-			sum += buffer[i % b];
-		}
-		else
-		{
-			sum += buffer[i];
-		}
-	}
-	printf("Result: %llu\n", sum);
-	free(buffer);
 }
 
-void writer(uint64_t n, uint64_t b)
-{
-	const char *name = "/jklp";									 // change the name if it already exists
-	const int oflag = O_CREAT | O_EXCL | O_RDWR; // create, fail if exists, read+write
-	const mode_t permission = S_IRUSR | S_IWUSR; // 600
-	const int fd = shm_open(name, oflag, permission);
-	if (fd < 0)
-	{
+uint64_t reader(uint64_t n, uint64_t b, uint64_t shared_mem_size, const char * name){
+	const int fd = shm_open(name, O_RDWR,0);
+	if (fd < 0) {
 		perror("shm_open");
-		return;
-	}
-
-	const uint64_t shared_mem_size = b;
-	if (ftruncate(fd, shared_mem_size * sizeof(uint64_t)) != 0)
-	{
-		perror("ftruncate");
-		return;
-	}
-
-	uint64_t *shared_mem = mmap(NULL, shared_mem_size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
-	if (shared_mem == MAP_FAILED)
-	{
-		perror("mmap");
-		return;
-	}
-
-	uint64_t *content = calloc(n, sizeof(uint64_t) * n);
-	for (uint64_t i = 0; i < n; ++i)
-	{
-		if (n > b)
-		{
-			content[i % b] = i + 1;
-		}
-		else
-		{
-			content[i] = i + 1;
-		}
-	}
-	memcpy(shared_mem, content, shared_mem_size * sizeof(uint64_t));
-
-	sleep(200 * 1000); // Give reader a chance to read the message
-
-	munmap(shared_mem, shared_mem_size);
-	close(fd);
-	shm_unlink(name);
-	free(content);
-}
-
-int main(int argc, char *argv[])
-{
-	if (argc != 3)
-	{
-		printf("usage ./<filename> <N> <B>; replace N and B with int(s)");
 		return EXIT_FAILURE;
 	}
 
-	char *end1 = NULL;
-	char *end2 = NULL; 
+	uint64_t * shared_mem = mmap(NULL,  shared_mem_size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+	if (shared_mem == MAP_FAILED){
+		perror("mmap");
+		return EXIT_FAILURE;
+	}
+
+	uint64_t sum = 0;
+	for (uint64_t i = 0; i < n; ++i) {
+		if (n >= b){
+			sum += shared_mem[i % b];
+		} else{
+			sum += shared_mem[i];
+		}
+	}
+	munmap(shared_mem, shared_mem_size);
+	close(fd);
+	return sum;
+}
+
+int initialize_shared_mem(const char * name, const uint64_t shared_mem_size){
+	const int oflag = O_CREAT | O_EXCL | O_RDWR;    //fail if name already exists, read+write
+	const mode_t permission = S_IRUSR | S_IWUSR;    //600
+
+	const int fd = shm_open(name, oflag, permission);
+	if (fd < 0) {
+		perror("shm_open");
+		return EXIT_FAILURE;
+	}
+
+	if (ftruncate(fd, shared_mem_size) != 0){
+		perror("ftruncate");
+		return EXIT_FAILURE;
+	}
+
+	uint64_t * shared_mem = mmap(NULL, shared_mem_size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+	if (shared_mem == MAP_FAILED){
+		perror("mmap");
+		return EXIT_FAILURE;
+	}
+
+	munmap(shared_mem, shared_mem_size);
+	close(fd);
+	return EXIT_SUCCESS;
+}
+
+int main (int argc, char * argv[]){
+
+	if (argc != 3){
+		return EXIT_FAILURE;
+	}
+
+	char * end1 = NULL;
+	char * end2 = NULL;
 
 	uint64_t n = strtol(argv[1], &end1, 10);
 	uint64_t b = strtol(argv[2], &end2, 10);
 
-	writer(n,b);
-	sleep(100 * 100 * 100);
-	reader(n, b);
+	char * name = "/shared_mem";
+	const uint64_t shared_mem_size = b * sizeof(uint64_t);
 
-	//pid_t writer_proc, reader_proc;
-	// https://stackoverflow.com/questions/6542491/how-to-create-two-processes-from-a-single-parent
-	/*
-	(writer_proc = fork()) && (reader_proc = fork());
-	if (reader_proc == -1 || writer_proc == -1)
+	if(initialize_shared_mem(name, shared_mem_size) != EXIT_SUCCESS){ 
 		return EXIT_FAILURE;
+	}
 
-	if (writer_proc == 0)
-	{
-		writer(n, b);
+	const pid_t writer_proc = fork();
+	if(writer_proc == -1){
+		return EXIT_FAILURE;
 	}
-	else if (reader_proc == 0)
-	{
-		wait(NULL);
-		reader(n, b);		
+
+	if(writer_proc == 0){
+		writer(n, b, shared_mem_size, name);
+		exit(0);
 	}
-	else
-	{
-		wait(NULL);
-		return EXIT_SUCCESS;
+
+
+	const pid_t reader_proc = fork();
+	if(reader_proc == -1) {
+		return EXIT_FAILURE;
 	}
-	*/
+
+	if(reader_proc == 0) {
+		printf("%llu", reader(n, b, shared_mem_size, name));
+		exit(0);
+	}
+
+	wait(NULL); // wait for both forks
+	wait(NULL);
+
+	shm_unlink(name); //delete shared memory
+
+	return EXIT_SUCCESS;
 }
-
-/*	Observations:
- *  -> If you quit your program clean (close and unlink the file/shared memory segment)
- *     you should get the correct answer. But there is a problem, if N > B you have
- *     to use the ring buffer. Due to the implementation, the ring buffer doesn't work
- *     as expected, because it doesn't wait for the reader to read the value and then
- *     override it. It overrides it, nevertheless the reader has read it or not.
- *
- *  -> If you try really large numbers for N and B, especially for N, you can get
- *     some really strange numbers, and the output is not consistent (N = 100000, B = 100000),
- *     for example on WSL I get a really big, negative number and on mac I don't even get a result.
- *     For such big numbers, it is very likely to run into an overflow.
- *
- */
