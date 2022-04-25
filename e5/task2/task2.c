@@ -109,11 +109,8 @@ int main(int argc, char **argv)
     return EXIT_FAILURE;
   }
 
-  char *end1 = NULL;
-  char *end2 = NULL;
-
-  uint64_t n = strtol(argv[1], &end1, 10);
-  uint64_t b = strtol(argv[2], &end2, 10);
+  uint64_t n = strtol(argv[1], NULL, 10);
+  uint64_t b = strtol(argv[2], NULL, 10);
 
   ThreadData *data = allocate_ring_buff(b);
 
@@ -124,7 +121,7 @@ int main(int argc, char **argv)
   if (writer_proc == -1)
     return EXIT_FAILURE;
 
-  if (writer_proc == 0)
+  if (writer_proc == 0) // Child 1
   {
     writer(n, b, data);
     free_data(b, data);
@@ -135,14 +132,14 @@ int main(int argc, char **argv)
   if (reader_proc == -1)
     return EXIT_FAILURE;
 
-  if (reader_proc == 0)
+  if (reader_proc == 0) // Child 2
   {
     printf("%lu", reader(n, b, data));
     free_data(b, data);
     exit(0);
   }
-  wait(0);
 
+  wait(0);
   free_data(b, data);
 }
 
