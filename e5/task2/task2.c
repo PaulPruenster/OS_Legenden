@@ -13,18 +13,18 @@
 
 typedef struct data
 {
-  char *name;
   int fd;
   uint64_t *shared_mem;
   sem_t write;
   sem_t consume;
 } ThreadData;
 
-ThreadData *allocate_ring_buff(uint64_t b)
+ThreadData *allocate_ring_buff(const char *name, uint64_t b)
 {
   char *name = "test1";
 
   const int oflag = O_CREAT | O_EXCL | O_RDWR;
+
   const mode_t permission = S_IRUSR | S_IWUSR; // 600
   const int fd = shm_open(name, oflag, permission);
   if (fd < 0)
@@ -50,7 +50,6 @@ ThreadData *allocate_ring_buff(uint64_t b)
   ThreadData *structdata = malloc(sizeof(structdata));
   structdata->fd = fd;
   structdata->shared_mem = shared_mem;
-  structdata->name = name;
 
   return structdata;
 }
@@ -112,7 +111,8 @@ int main(int argc, char **argv)
   uint64_t n = strtol(argv[1], NULL, 10);
   uint64_t b = strtol(argv[2], NULL, 10);
 
-  ThreadData *data = allocate_ring_buff(b);
+  const char *name = "/csaz9802shared_memoryasass";
+  ThreadData *data = allocate_ring_buff(name, b);
 
   sem_init(&data->write, 0, 1);
   sem_init(&data->consume, 0, 1);
