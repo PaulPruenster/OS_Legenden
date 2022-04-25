@@ -22,7 +22,7 @@ typedef struct data
 
 ThreadData *allocate_ring_buff(uint64_t b)
 {
-  const char *name = "testsdfasdfasdf";
+  char *name = "testsdfasdfasdf";
 
   const int oflag = O_CREAT | O_EXCL | O_RDWR;
   const mode_t permission = S_IRUSR | S_IWUSR; // 600
@@ -59,7 +59,7 @@ void free_data(uint64_t b, ThreadData *data)
 {
   munmap(data->shared_mem, b * sizeof(uint64_t));
   close(data->fd);
-  shm_unlink(&data->name);
+  shm_unlink(data->name);
   sem_destroy(&data->write);
   sem_destroy(&data->consume);
   free(data);
@@ -69,7 +69,7 @@ void writer(uint64_t n, uint64_t b, ThreadData *data)
 {
   for (uint64_t i = 0; i < n; ++i)
   {
-    sem_wait(&data->consume);
+    sem_wait(&data->write);
     if (n > b)
     {
       data->shared_mem[i % b] = i + 1;
@@ -78,7 +78,7 @@ void writer(uint64_t n, uint64_t b, ThreadData *data)
     {
       data->shared_mem[i] = i + 1;
     }
-    sem_post(&data->write);
+    sem_post(&data->consume);
   }
 }
 
@@ -87,7 +87,7 @@ uint64_t reader(uint64_t n, uint64_t b, struct data *data)
   uint64_t sum = 0;
   for (uint64_t i = 0; i < n; ++i)
   {
-    sem_wait(&data->write);
+    sem_wait(&data->consume);
     if (n > b)
     {
       sum += data->shared_mem[i % b];
@@ -96,7 +96,7 @@ uint64_t reader(uint64_t n, uint64_t b, struct data *data)
     {
       sum += data->shared_mem[i];
     }
-    sem_post(&data->consume);
+    sem_post(&data->write);
   }
   return sum;
 }
