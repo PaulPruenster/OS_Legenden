@@ -22,7 +22,7 @@ typedef struct data
 
 ThreadData *allocate_ring_buff(uint64_t b)
 {
-  char *name = "testsdfasdfasdf";
+  char *name = "test1";
 
   const int oflag = O_CREAT | O_EXCL | O_RDWR;
   const mode_t permission = S_IRUSR | S_IWUSR; // 600
