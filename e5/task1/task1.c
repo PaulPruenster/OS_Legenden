@@ -1,81 +1,108 @@
-#include <fcntl.h>
-#include <inttypes.h>
 #include <stddef.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <string.h>
+#include <fcntl.h>
 #include <sys/mman.h>
+#include <sys/stat.h>
+#include <sys/wait.h>
 #include <unistd.h>
+#include <stdint.h>
 
-struct data
+// TODO: Fix on ZID (hin)
+
+void reader(uint64_t n, uint64_t b)
 {
-	int fd;
-	uint64_t *shared_mem;
-};
+	const char *name = "/jklp";
+	const int oflag = O_RDWR; // open read+write
+	const int fd = shm_open(name, oflag, 0);
+	if (fd < 0)
+	{
+		// This fails on compiler explorer, but works on a normal system
+		perror("shm_open");
+		return;
+	}
 
-void *allocate_ring_buff(const char *name, uint64_t b)
+	const uint64_t shared_mem_size = n;
+	uint64_t *shared_mem = mmap(NULL, shared_mem_size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
+	if (shared_mem == MAP_FAILED)
+	{
+		perror("mmap");
+		return;
+	}
+
+	uint64_t *buffer = calloc(b, sizeof(uint64_t) * shared_mem_size);
+	memcpy(buffer, shared_mem, shared_mem_size * sizeof(uint64_t));
+
+	munmap(shared_mem, shared_mem_size);
+	close(fd);
+	shm_unlink(name);
+
+	uint64_t sum = 0;
+	for (uint64_t i = 0; i < n; ++i)
+	{
+		if (n > b)
+		{
+			sum += buffer[i % b];
+		}
+		else
+		{
+			sum += buffer[i];
+		}
+	}
+	printf("Result: %llu\n", sum);
+	free(buffer);
+}
+
+void writer(uint64_t n, uint64_t b)
 {
-
-	const int oflag = O_CREAT | O_EXCL | O_RDWR;
-
+	const char *name = "/jklp";									 // change the name if it already exists
+	const int oflag = O_CREAT | O_EXCL | O_RDWR; // create, fail if exists, read+write
 	const mode_t permission = S_IRUSR | S_IWUSR; // 600
 	const int fd = shm_open(name, oflag, permission);
 	if (fd < 0)
 	{
 		perror("shm_open");
-		return NULL;
+		return;
 	}
 
-	const size_t shared_mem_size = b * sizeof(uint64_t);
-
-	if (ftruncate(fd, shared_mem_size) != 0)
+	const uint64_t shared_mem_size = b;
+	if (ftruncate(fd, shared_mem_size * sizeof(uint64_t)) != 0)
 	{
 		perror("ftruncate");
-		return NULL;
+		return;
 	}
 
 	uint64_t *shared_mem = mmap(NULL, shared_mem_size, PROT_READ | PROT_WRITE, MAP_SHARED, fd, 0);
 	if (shared_mem == MAP_FAILED)
 	{
 		perror("mmap");
-		return NULL;
+		return;
 	}
-	struct data structdata = {.fd = fd, .shared_mem = shared_mem};
-	return &structdata;
-}
-uint64_t reader(uint64_t n, uint64_t b, struct data *structdata)
-{
-	uint64_t sum = 0;
+
+	uint64_t *content = calloc(n, sizeof(uint64_t) * n);
 	for (uint64_t i = 0; i < n; ++i)
 	{
 		if (n > b)
 		{
-			sum += structdata->shared_mem[i % b];
+			content[i % b] = i + 1;
 		}
 		else
 		{
-			sum += structdata->shared_mem[i];
+			content[i] = i + 1;
 		}
 	}
-	return sum;
+	memcpy(shared_mem, content, shared_mem_size * sizeof(uint64_t));
+
+	sleep(200 * 1000); // Give reader a chance to read the message
+
+	munmap(shared_mem, shared_mem_size);
+	close(fd);
+	shm_unlink(name);
+	free(content);
 }
 
-void writer(uint64_t n, uint64_t b, struct data *structdata)
-{
-	for (uint64_t i = 0; i < n; ++i)
-	{
-		if (n > b)
-		{
-			structdata->shared_mem[i % b] = i + 1;
-		}
-		else
-		{
-			structdata->shared_mem[i] = i + 1;
-		}
-	}
-	// usleep(200 * 1000); // Give reader a chance to read the message
-}
-
-int main(int argc, char **argv)
+int main(int argc, char *argv[])
 {
 	if (argc != 3)
 	{
@@ -84,59 +111,37 @@ int main(int argc, char **argv)
 	}
 
 	char *end1 = NULL;
-	char *end2 = NULL;
+	char *end2 = NULL; 
 
 	uint64_t n = strtol(argv[1], &end1, 10);
 	uint64_t b = strtol(argv[2], &end2, 10);
 
-	const char *name = "/csaz9802shared_memoryasass";
-	struct data *structdata = allocate_ring_buff(name, b);
+	writer(n,b);
+	sleep(100 * 100 * 100);
+	reader(n, b);
 
+	//pid_t writer_proc, reader_proc;
+	// https://stackoverflow.com/questions/6542491/how-to-create-two-processes-from-a-single-parent
 	/*
-	 * Ob do fongs on richtig skuffed zu werden; is programm on sich tat eigentlich perfekt funken,
-	 * wenn man lei so forked wia dr typ af die Folien. so wia i fork isch af jeden foll folsch, ober
-	 * keine ohnung wia i des fixen soll. joe hot gmoant, er hots gschofft, und infoll hilft er mir morgen.
-	 *
-	 * Basically des programm erstellt mit allocate_ring_buff() a geteilten speicher und returned des
-	 * struct mit olle wichtigen variablen.
-	 * die methode writer sollte als erstes aufgruafen werden, de schreib nr die werte in den buffer/
-	 * shared memory segement eini. onschließend sollte dr reader aufgruafen werden, der no in inholt
-	 * auslest und a akkumilierte summe bildet und returned. in dr main werd nr die sel geprinted.
-	 *
-	 * Edit Paul:
-	 * die integer miesein jo hinteranonder eini gschrieben werden weils a ringbuffer isch schunscht kimps zu a kolision so wie i die
-	 * aufgobe verste sollmor des so lóssen a wenns hin sich und donn in dor negsten aufobe fixen mit dor semophore, weil in dor theorie
-	 * isches so a net wirklich meglich odor bzw lei wenn dor buffer greos genue isch dass di zohlen plotz hoben.
-	 */
-
-	const pid_t writer_proc = fork();
-	if (writer_proc == -1)
+	(writer_proc = fork()) && (reader_proc = fork());
+	if (reader_proc == -1 || writer_proc == -1)
 		return EXIT_FAILURE;
 
 	if (writer_proc == 0)
 	{
-		writer(n, b, structdata);
-		exit(0); // hot gfahlt also hot sein kind a nomol geforkt
+		writer(n, b);
 	}
-	// wait(0);
-	const pid_t reader_proc = fork();
-
-	if (reader_proc == -1)
-		return EXIT_FAILURE;
-
-	if (reader_proc == 0)
+	else if (reader_proc == 0)
 	{
-		printf("%llu", reader(n, b, structdata));
-		exit(0);
+		wait(NULL);
+		reader(n, b);		
 	}
 	else
 	{
-		wait(-1);
+		wait(NULL);
+		return EXIT_SUCCESS;
 	}
-
-	munmap(structdata->shared_mem, b * sizeof(uint64_t));
-	close(structdata->fd);
-	shm_unlink(name);
+	*/
 }
 
 /*	Observations:
@@ -146,7 +151,9 @@ int main(int argc, char **argv)
  *     as expected, because it doesn't wait for the reader to read the value and then
  *     override it. It overrides it, nevertheless the reader has read it or not.
  *
- *  -> If you try really large numbers for N and B, it is likely to run into an overflow or even the
- *     program will crash, due to a too big number and end in an SIGSEV.
+ *  -> If you try really large numbers for N and B, especially for N, you can get
+ *     some really strange numbers, and the output is not consistent (N = 100000, B = 100000),
+ *     for example on WSL I get a really big, negative number and on mac I don't even get a result.
+ *     For such big numbers, it is very likely to run into an overflow.
  *
  */
