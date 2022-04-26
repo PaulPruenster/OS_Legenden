@@ -1,5 +1,3 @@
-// C program to implement one side of FIFO
-// This side reads first, then reads
 #include <stdbool.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -11,10 +9,10 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 #include <unistd.h>
+#define MSGSIZE 1000
 
 struct message {
-	char data[1000];
-	bool quit;
+	char data[MSGSIZE];
 };
 typedef struct message message;
 
@@ -26,14 +24,11 @@ int main(int argc, char* argv[]) {
 	}
 	const mqd_t mq = mq_open(argv[1], O_WRONLY, 0, NULL);
 	if(mq == -1) {
-		printf("fehler open");
+		printf("fehler open\n");
 		return EXIT_FAILURE;
 	}
 	message msg = {0};
-	fgets( msg.data, 1000, stdin);
-	if(msg.data[0] == '\n'){
-		msg.quit = true;
-	}
+	fgets( msg.data, MSGSIZE, stdin);
 	mq_send(mq, (const char*)&msg, sizeof(msg), atoi(argv[2]));
 	mq_close(mq);
 }
