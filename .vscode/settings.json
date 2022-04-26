@@ -1,0 +1,8 @@
+{
+  "files.associations": {
+    "mman.h": "c",
+    "stat.h": "c",
+    "semaphore.h": "c"
+  },
+  "C_Cpp.errorSquiggles": "EnabledIfIncludesResolve"
+}
