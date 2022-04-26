@@ -7,7 +7,7 @@ clean:
 	$(RM) print_server print
 
 print_server: print_server.c
-	$(CC) $(CFLAGS) -o $@ $^ -D_DEFAULT_SOURCE -lrt
+	$(CC) $(CFLAGS) -o $@ $^ -D_POSIX_C_SOURCE -D_BSD_SOURCE -D_DEFAULT_SOURCE -lrt
 
 print: print.c
 	$(CC) $(CFLAGS) -o $@ $^ -lrt
