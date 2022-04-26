@@ -54,7 +54,7 @@ int main(int argc, char *argv[])
 		printf("wrong amount of arguments!\n");
 		return EXIT_FAILURE;
 	}
-	char name[MSGSIZE + 9];
+	char name[1000];
 	if (argv[1][0] == '/')
 		sprintf(name, "/csaz9531%s", argv[1] + 1);
 	else
