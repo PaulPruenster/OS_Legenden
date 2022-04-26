@@ -15,10 +15,11 @@
 #define MSGSIZE 1000
 
 volatile bool STOP = false;
-char *NAME;
+char * NAME;
+char *color[] = {"\033[1;31m", "\033[31;1m", "\033[0;33m", "\033[0;32m","\033[0;34m","\033[0;36m"};
 mqd_t mq;
-static void handler()
-{
+static void handler() {
+	printf("\033[0;34m");
 	printf("\nShutting down\n");
 	mq_close(mq);
 	mq_unlink(NAME);
@@ -45,6 +46,7 @@ bool create_message_queue(const char *name)
 
 int main(int argc, char *argv[])
 {
+	printf("\033[0;34m");
 	struct sigaction psa;
 	psa.sa_handler = &handler;
 	sigaction(SIGINT, &psa, NULL);
@@ -89,13 +91,16 @@ int main(int argc, char *argv[])
 		char a = msg.data[i];
 		while (a != '\0' && i < MSGSIZE)
 		{
+			printf("%s", color[i % 6]);
 			putc(a, stdout);
 			usleep(200000);
 			fflush(stdout);
 			a = msg.data[++i];
 		}
-		// new Line if  last Character is not '\n'
-		if (msg.data[i - 1] != '\n' && msg.data[i] != '\n')
+		printf("\033[0;34m");
+		//new Line if  last Character is not '\n'
+		if(msg.data[i - 1] != '\n' && msg.data[i] != '\n')
+
 			putc('\n', stdout);
 	}
 	return EXIT_SUCCESS;
