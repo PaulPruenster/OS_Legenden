@@ -7,5 +7,8 @@ all: task2
 clean:
 	$(RM) task2.o task2
 
+unlink: unlink.c
+	gcc -Wall unlink.c -o unlink -lrt
+
 task2: task2.c
 	$(CC) $(CFLAGS) -o $@ $^ -lrt -pthread
