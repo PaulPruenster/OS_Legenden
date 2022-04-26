@@ -1,4 +1,4 @@
-CFLAGS = -std=c11 -Wall -Wextra -Wpedantic #-fsanitize=address -Wconversion
+CFLAGS = -std=c11 -Wall -g -Wextra -Wpedantic #-fsanitize=address -Wconversion
 
 .PHONY: all
 all: task2

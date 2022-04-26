@@ -30,11 +30,12 @@ void writer(uint64_t n, uint64_t b, ThreadData *structdata)
 
 	munmap(structdata->shared_mem, structdata->shared_mem_size);
 	close(structdata->fd);
+	free(structdata);
 }
 
 void reader(uint64_t n, uint64_t b, ThreadData *structdata)
 {
-	structdata->shared_mem[b] = 0;  
+	structdata->shared_mem[b] = 0;
 	for (uint64_t i = 0; i < n; ++i)
 	{
 		if (n >= b)
@@ -49,6 +50,7 @@ void reader(uint64_t n, uint64_t b, ThreadData *structdata)
 	printf("%llu", structdata->shared_mem[b]);
 	munmap(structdata->shared_mem, structdata->shared_mem_size);
 	close(structdata->fd);
+	free(structdata);
 }
 
 ThreadData *initialize_shared_mem(const char *name, const uint64_t shared_mem_size)
@@ -133,6 +135,7 @@ int main(int argc, char *argv[])
 	munmap(structdata->shared_mem, shared_mem_size);
 	close(structdata->fd);
 	shm_unlink(name); // delete shared memory
+	free(structdata);
 
 	return EXIT_SUCCESS;
 }

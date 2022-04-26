@@ -53,22 +53,27 @@ void writer(uint64_t n, uint64_t b, ThreadData *structdata, SemaData *semadata)
   }
 
   close_shm(structdata, semadata);
+  free(structdata);
+  free(semadata);
 }
 
-uint64_t reader(uint64_t n, uint64_t b, ThreadData *structdata, SemaData *semadata)
+void reader(uint64_t n, uint64_t b, ThreadData *structdata, SemaData *semadata)
 {
-  uint64_t sum = 0;
+  structdata->shared_mem[b] = 0;
+
   for (uint64_t i = 0; i < n; ++i)
   {
     sem_wait(&semadata->CONSUME);
     if (n >= b)
-      sum += structdata->shared_mem[i % b];
+      structdata->shared_mem[b] += structdata->shared_mem[i % b];
     else
-      sum += structdata->shared_mem[i];
+      structdata->shared_mem[b] += structdata->shared_mem[i];
     sem_post(&semadata->WRITE);
   }
+  printf("%lu\n", structdata->shared_mem[b]);
   close_shm(structdata, semadata);
-  return sum;
+  free(structdata);
+  free(semadata);
 }
 
 void *initialize_shared_mem(const char *name, const uint64_t shared_mem_size, const int mode)
@@ -139,7 +144,7 @@ int main(int argc, char *argv[])
   sem_init(&semadata->CONSUME, 1, 0);
 
   char *name = "/shared_mem";
-  const uint64_t shared_mem_size = b * sizeof(uint64_t);
+  const uint64_t shared_mem_size = (b + 1) * sizeof(uint64_t);
   ThreadData *structdata = initialize_shared_mem(name, shared_mem_size, CONTENT);
   if (structdata == NULL)
   {
@@ -166,7 +171,7 @@ int main(int argc, char *argv[])
 
   if (reader_proc == 0)
   {
-    printf("%lu\n", reader(n, b, structdata, semadata));
+    reader(n, b, structdata, semadata);
     exit(0);
   }
 
@@ -174,6 +179,8 @@ int main(int argc, char *argv[])
   close_shm(structdata, semadata);
   shm_unlink(name);     // delete shared memory
   shm_unlink(name_sem); // delete shared memory
+  free(structdata);
+  free(semadata);
 
   return EXIT_SUCCESS;
 }
