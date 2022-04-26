@@ -53,14 +53,19 @@ int main(int argc, char *argv[])
 		printf("wrong amount of arguments!");
 		return EXIT_FAILURE;
 	}
-	if (!create_message_queue(argv[1]))
+	char name[MSGSIZE + 9];
+	sprintf(name, "/csaz9531%s", argv[1]);
+	NAME = name;
+	
+	if (!create_message_queue(NAME))
 	{
-		printf("error creat mp\n");
+		printf("error creat mp ( '/' gets added by programm)\n");
 		return EXIT_FAILURE;
 	}
-	NAME = argv[1];
-	
-	mq = mq_open(argv[1], O_RDONLY, 0, NULL);
+	fprintf(stdout,"%s created\n", NAME);
+	fflush(stdout);
+
+	mq = mq_open(NAME, O_RDONLY, 0, NULL);
 	if (mq == -1)
 	{
 		printf("error open mp\n");

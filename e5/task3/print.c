@@ -10,7 +10,7 @@
 #include <sys/types.h>
 #include <unistd.h>
 #define MSGSIZE 1000
-
+char * NAME;
 struct message {
 	char data[MSGSIZE];
 };
@@ -22,7 +22,10 @@ int main(int argc, char* argv[]) {
 		printf("wrong amount of arguments!\n");
 		return EXIT_FAILURE;
 	}
-	const mqd_t mq = mq_open(argv[1], O_WRONLY, 0, NULL);
+	char name[MSGSIZE + 9];
+	sprintf(name, "/csaz9531%s", argv[1]);
+	NAME = name;
+	const mqd_t mq = mq_open(NAME, O_WRONLY, 0, NULL);
 	if(mq == -1) {
 		printf("fehler open\n");
 		return EXIT_FAILURE;
