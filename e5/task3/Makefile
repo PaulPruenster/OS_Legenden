@@ -1,13 +1,13 @@
 CFLAGS = -std=c11 -Wall -Wextra -Wpedantic #-fsanitize=address -Wconversion
 
 .PHONY: all clean
-all: print_server print
+all: task3_printer_server task3_printer
 
 clean:
-	$(RM) print_server print
+	$(RM) task3_printer_server task3_printer
 
-print_server: print_server.c
+task3_printer_server: task3_printer_server.c
 	$(CC) $(CFLAGS) -o $@ $^ -D_DEFAULT_SOURCE -lrt
 
-print: print.c
+task3_printer: task3_printer.c
 	$(CC) $(CFLAGS) -o $@ $^ -lrt
