@@ -32,23 +32,23 @@ void writer(uint64_t n, uint64_t b, ThreadData *structdata)
 	close(structdata->fd);
 }
 
-uint64_t reader(uint64_t n, uint64_t b, ThreadData *structdata)
+void reader(uint64_t n, uint64_t b, ThreadData *structdata)
 {
-	uint64_t sum = 0;
+	structdata->shared_mem[b] = 0;  
 	for (uint64_t i = 0; i < n; ++i)
 	{
 		if (n >= b)
 		{
-			sum += structdata->shared_mem[i % b];
+			structdata->shared_mem[b] += structdata->shared_mem[i % b];
 		}
 		else
 		{
-			sum += structdata->shared_mem[i];
+			structdata->shared_mem[b] += structdata->shared_mem[i];
 		}
 	}
+	printf("%llu", structdata->shared_mem[b]);
 	munmap(structdata->shared_mem, structdata->shared_mem_size);
 	close(structdata->fd);
-	return sum;
 }
 
 ThreadData *initialize_shared_mem(const char *name, const uint64_t shared_mem_size)
@@ -97,7 +97,7 @@ int main(int argc, char *argv[])
 	uint64_t b = strtol(argv[2], &end2, 10);
 
 	char *name = "/shared_mem";
-	const uint64_t shared_mem_size = b * sizeof(uint64_t);
+	const uint64_t shared_mem_size = (b + 1) * sizeof(uint64_t);
 	ThreadData *structdata = initialize_shared_mem(name, shared_mem_size);
 	if (structdata == NULL)
 	{
@@ -124,7 +124,7 @@ int main(int argc, char *argv[])
 
 	if (reader_proc == 0)
 	{
-		printf("%llu", reader(n, b, structdata));
+		reader(n, b, structdata);
 		exit(0);
 	}
 
