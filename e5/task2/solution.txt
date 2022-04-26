@@ -1,0 +1,54 @@
+Time:
+nuki:~/Desktop/OS_Legenden/e5/task1$ time ./task1 1000 10
+995500
+real    0m0.002s
+user    0m0.002s
+sys     0m0.000s
+
+
+nuki:~/Desktop/OS_Legenden/e5/task2$ time ./task2 1000 10
+500500
+
+real    0m0.011s
+user    0m0.003s
+sys     0m0.006s
+
+The task 2 program is way slower becaus of the semaphores witch the programs have to wait for.
+
+
+- What is the difference between shared memory and e.g. a global variable after calling fork()?
+    Shared memory receives updates even after a fork(). A global variable gets copied during a fork() and 
+    each process works on his own local copy of the global variable and doesn't get updates. 
+
+-  What is a race condition?
+    When the result of some code depends on which thread/process was executed first this is called a race condition
+
+- Why do race conditions occur?
+    The occur because code may depend on other threads/processes and their result. Probably the 
+    code lacks synchronization. 
+
+- Is the output of a program with a race condition always incorrect?
+    No, its random, because you can't tell which process/thread terminates first. 
+
+- If you run your program 100 times and always get the correct result, does that mean that there is no race condition?
+    No, you could run a program even ofter and get the right result, if you are a lucky. A correct result doesn't implies 
+    correct code. 
+
+- What is synchronization?
+    When you have multiple processes and common recourses deadlocks or race conditions can occur. This leads
+    to undefined behavior in the program. You can prevent this with synchronization by locking the recourses and blocking 
+    the processes with semaphores and mutexes.
+
+- Why are semaphores well suited for synchronizing writer-reader patterns?
+    Semaphores are just a value that gets incremented or decremented. So if one process increments and 
+    one decrements the value it is a simple way to implement the read/write pattern.
+
+- There are two ways of creating a POSIX semaphore. Which would you use when?
+    There are named and unnamed semaphores, named semaphores are allocated with a name and can
+    be reopened with that name.
+
+- Could Task 2 also be implemented using a single semaphore?
+    We definitely need to use 2 semaphores because the writer and the reader both need to be 
+    blocked alternatingly. If not either the writer writes all the data into the memory ans the
+    reader is too late or vice versa.
+

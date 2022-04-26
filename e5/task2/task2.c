@@ -184,20 +184,3 @@ int main(int argc, char *argv[])
 
   return EXIT_SUCCESS;
 }
-/*	Observations:
-nuki:~/Desktop/OS_Legenden/e5/task1$ time ./task1 1000 10
-995500
-real    0m0.002s
-user    0m0.002s
-sys     0m0.000s
-
-
-nuki:~/Desktop/OS_Legenden/e5/task2$ time ./task2 1000 10
-500500
-
-real    0m0.011s
-user    0m0.003s
-sys     0m0.006s
-
-The task 2 program is way slower becaus of the semaphores witch the programs have to wait for
- */

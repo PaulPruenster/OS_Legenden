@@ -147,6 +147,6 @@ int main(int argc, char *argv[])
  *     overrides it. It overrides it, nevertheless the reader has read it or not.
  *
  *  -> If you try really large numbers for N and B, it is likely to run into an overflow or even the
- *     program will crash, due to a too big number and end in an SIGSEV.
+ *     program will crash, due to a too big number and end in an SIGSEV or a complete wrong result.
  *
  */
