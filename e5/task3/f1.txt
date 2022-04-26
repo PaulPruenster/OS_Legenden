@@ -1,1 +1,1 @@
-wrong amount of arguments!
+This is a test thanks!
