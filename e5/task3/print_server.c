@@ -15,9 +15,10 @@
 #define MSGSIZE 1000
 
 volatile bool STOP = false;
-char * NAME;
+char *NAME;
 mqd_t mq;
-static void handler() {
+static void handler()
+{
 	printf("\nShutting down\n");
 	mq_close(mq);
 	mq_unlink(NAME);
@@ -50,19 +51,23 @@ int main(int argc, char *argv[])
 
 	if (argc != 2)
 	{
-		printf("wrong amount of arguments!");
+		printf("wrong amount of arguments!\n");
 		return EXIT_FAILURE;
 	}
 	char name[MSGSIZE + 9];
-	sprintf(name, "/csaz9531%s", argv[1]);
+	if (argv[1][0] == '/')
+		sprintf(name, "/csaz9531%s", argv[1] + 1);
+	else
+		sprintf(name, "/csaz9531%s", argv[1]);
+
 	NAME = name;
-	
+
 	if (!create_message_queue(NAME))
 	{
 		printf("error creat mp ( '/' gets added by programm)\n");
 		return EXIT_FAILURE;
 	}
-	fprintf(stdout,"%s created\n", NAME);
+	fprintf(stdout, "%s created\n", NAME);
 	fflush(stdout);
 
 	mq = mq_open(NAME, O_RDONLY, 0, NULL);
@@ -89,10 +94,9 @@ int main(int argc, char *argv[])
 			fflush(stdout);
 			a = msg.data[++i];
 		}
-		//new Line if  last Character is not '\n'
-		if(msg.data[i - 1] != '\n' && msg.data[i] != '\n')
+		// new Line if  last Character is not '\n'
+		if (msg.data[i - 1] != '\n' && msg.data[i] != '\n')
 			putc('\n', stdout);
-		
 	}
 	return EXIT_SUCCESS;
 }
