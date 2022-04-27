@@ -66,7 +66,7 @@ int main(int argc, char *argv[])
 
 	if (!create_message_queue(NAME))
 	{
-		printf("error creat mp ( '/' gets added by programm)\n");
+		printf("error creat mp\n");
 		return EXIT_FAILURE;
 	}
 	fprintf(stdout, "%s created\n", NAME);
