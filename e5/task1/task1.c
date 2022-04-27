@@ -18,17 +18,11 @@ void writer(uint64_t n, uint64_t b, ThreadData *structdata)
 {
 	for (uint64_t i = 0; i < n; ++i)
 	{
-		if (n >= b)
-		{
-			structdata->shared_mem[i % b] = i + 1;
-		}
-		else
-		{
-			structdata->shared_mem[i] = i + 1;
-		}
+		structdata->shared_mem[i % b] = i + 1;
 	}
 
 	munmap(structdata->shared_mem, structdata->shared_mem_size);
+	//close wird nicht gebraucht, nach PS leiter
 	close(structdata->fd);
 	free(structdata);
 }
@@ -38,17 +32,11 @@ void reader(uint64_t n, uint64_t b, ThreadData *structdata)
 	structdata->shared_mem[b] = 0;
 	for (uint64_t i = 0; i < n; ++i)
 	{
-		if (n >= b)
-		{
-			structdata->shared_mem[b] += structdata->shared_mem[i % b];
-		}
-		else
-		{
-			structdata->shared_mem[b] += structdata->shared_mem[i];
-		}
+		structdata->shared_mem[b] += structdata->shared_mem[i % b];
 	}
 	printf("%llu", structdata->shared_mem[b]);
 	munmap(structdata->shared_mem, structdata->shared_mem_size);
+	//close wird nicht gebraucht, nach PS leiter
 	close(structdata->fd);
 	free(structdata);
 }
@@ -77,6 +65,7 @@ ThreadData *initialize_shared_mem(const char *name, const uint64_t shared_mem_si
 		perror("mmap");
 		return NULL;
 	}
+	//Auch ohne Malloc möglich, aber nicht im meinem Wissensbereich (Bissy)
 	ThreadData *structdata = malloc(sizeof(structdata));
 	structdata->fd = fd;
 	structdata->shared_mem = shared_mem;
@@ -95,6 +84,7 @@ int main(int argc, char *argv[])
 	char *end1 = NULL;
 	char *end2 = NULL;
 
+	//Richtigen Datentyp gnummen siuuuuuuuuuu
 	uint64_t n = strtol(argv[1], &end1, 10);
 	uint64_t b = strtol(argv[2], &end2, 10);
 
@@ -129,10 +119,11 @@ int main(int argc, char *argv[])
 		reader(n, b, structdata);
 		exit(0);
 	}
-
+	//Funkt nt wortet nt af olle, hoben mir ober schun gmocht, also nochschaugen
 	wait(NULL); // wait for both forks
 
 	munmap(structdata->shared_mem, shared_mem_size);
+	//close wird nicht gebraucht, nach PS leiter
 	close(structdata->fd);
 	shm_unlink(name); // delete shared memory
 	free(structdata);
