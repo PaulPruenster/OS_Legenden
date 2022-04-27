@@ -23,7 +23,7 @@ void writer(uint64_t n, uint64_t b, ThreadData *structdata)
 
 	munmap(structdata->shared_mem, structdata->shared_mem_size);
 	//close wird nicht gebraucht, nach PS leiter
-	close(structdata->fd);
+	//close(structdata->fd);
 	free(structdata);
 }
 
@@ -37,7 +37,7 @@ void reader(uint64_t n, uint64_t b, ThreadData *structdata)
 	printf("%llu", structdata->shared_mem[b]);
 	munmap(structdata->shared_mem, structdata->shared_mem_size);
 	//close wird nicht gebraucht, nach PS leiter
-	close(structdata->fd);
+	//close(structdata->fd);
 	free(structdata);
 }
 
@@ -66,7 +66,8 @@ ThreadData *initialize_shared_mem(const char *name, const uint64_t shared_mem_si
 		return NULL;
 	}
 	//Auch ohne Malloc möglich, aber nicht im meinem Wissensbereich (Bissy)
-	ThreadData *structdata = malloc(sizeof(structdata));
+	// Benno: Keine ahnung ohne, malloc werd ba ins nix geprinted
+	ThreadData * structdata = malloc(sizeof(structdata));
 	structdata->fd = fd;
 	structdata->shared_mem = shared_mem;
 	structdata->shared_mem_size = shared_mem_size;
@@ -120,11 +121,15 @@ int main(int argc, char *argv[])
 		exit(0);
 	}
 	//Funkt nt wortet nt af olle, hoben mir ober schun gmocht, also nochschaugen
-	wait(NULL); // wait for both forks
+	//wait(NULL); // wait for both forks
+
+	//sol:
+	int status = 0;
+	while(wait(&status) >= 0);
 
 	munmap(structdata->shared_mem, shared_mem_size);
 	//close wird nicht gebraucht, nach PS leiter
-	close(structdata->fd);
+	//close(structdata->fd);
 	shm_unlink(name); // delete shared memory
 	free(structdata);
 
