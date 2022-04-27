@@ -19,6 +19,8 @@ char * NAME;
 char *color[] = {"\033[1;31m", "\033[31;1m", "\033[0;33m", "\033[0;32m","\033[0;34m","\033[0;36m"};
 mqd_t mq;
 static void handler() {
+	//keine printf im Handler, sollte write sein. Oder noch besser mit globaler variable und in der schleife
+	//(dafür braucht es noch flag beim recieve )
 	printf("\033[0;34m");
 	printf("\nShutting down\n");
 	mq_close(mq);
