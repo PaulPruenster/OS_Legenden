@@ -2,7 +2,8 @@
   "files.associations": {
     "mman.h": "c",
     "stat.h": "c",
-    "semaphore.h": "c"
+    "semaphore.h": "c",
+    "stdlib.h": "c"
   },
   "C_Cpp.errorSquiggles": "EnabledIfIncludesResolve"
 }
