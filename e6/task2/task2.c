@@ -10,10 +10,18 @@
 #define CHILDREN 5
 
 pthread_mutex_t mut = PTHREAD_MUTEX_INITIALIZER;
+int global = 0;
+
+typedef struct thread_data
+{
+  int index;
+  myqueue *q;
+} thread_data;
 
 void *myThreadFun(void *vargp)
 {
-  myqueue *q = (myqueue *)vargp;
+  thread_data *td = (thread_data *)vargp;
+  myqueue *q = (myqueue *)td->q;
 
   int val = -1, sum = 0;
   bool b = true;
@@ -32,12 +40,11 @@ void *myThreadFun(void *vargp)
     }
     pthread_mutex_unlock(&mut);
   }
-  // printf("Sum %d\n", sum);
-  void *ret = malloc(sizeof(void *));
-  ret = (void *)(&sum);
 
-  printf("Pointer after cast :%d\n", *((int *)ret));
-  return ret;
+  global += sum;
+
+  printf("Consumer %i sum :%d\n", td->index, sum);
+  return NULL;
 }
 
 int main()
@@ -48,7 +55,11 @@ int main()
   pthread_t threads[CHILDREN];
   for (int i = 0; i < CHILDREN; i++)
   {
-    pthread_create(&threads[i], NULL, myThreadFun, (void *)q);
+    thread_data *td = malloc(sizeof(thread_data));
+    td->index = i;
+    td->q = q;
+
+    pthread_create(&threads[i], NULL, myThreadFun, (void *)td);
   }
 
   for (size_t i = 0; i < 100000; i++)
@@ -60,16 +71,12 @@ int main()
     myqueue_push(q, 0);
   }
 
-  int allsum = 0;
   for (int i = 0; i < CHILDREN; i++)
   {
-    void *child_sum;
-    pthread_join(threads[i], &child_sum);
-    allsum += *((int *)child_sum);
-    printf("sum_child %d, all %d\n", *((int *)child_sum), allsum);
+    pthread_join(threads[i], NULL);
   }
 
-  printf("Total sum: %d\n", allsum);
+  printf("Final sum: %d\n", global);
   fflush(stdout);
   pthread_exit(NULL);
   return 0;
