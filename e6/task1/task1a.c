@@ -17,7 +17,7 @@ int main()
 {
 	pid_t wpid;
 	int status = 0;
-	pthread_t thread;
+	pthread_t thread; 
 
 	printf("%d\n", counter);
 	if (fork() == 0)
