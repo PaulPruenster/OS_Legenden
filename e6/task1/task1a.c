@@ -7,7 +7,7 @@
 
 int counter = 1;
 
-void *inkrement_counter_function(void *ptr)
+void *inkrement_counter_function()
 {
 	counter += 1;
 	return NULL;
@@ -17,7 +17,7 @@ int main()
 {
 	pid_t wpid;
 	int status = 0;
-	pthread_t thread; 
+	pthread_t thread;
 
 	printf("%d\n", counter);
 	if (fork() == 0)
