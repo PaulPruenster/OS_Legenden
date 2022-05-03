@@ -1,9 +1,12 @@
 CFLAGS = -std=c11 -Wall -Wextra -Wpedantic #-fsanitize=address -Wconversion
 
 .PHONY: all clean
-all: task1
+all: task1a task1b
 clean:
-	$(RM) task1
+	$(RM) task1a task1b 
 
-task1: task1.c
+task1a: task1a.c
+	$(CC) $(CFLAGS) -o $@ $^
+
+task1b: task1b.c
 	$(CC) $(CFLAGS) -o $@ $^
