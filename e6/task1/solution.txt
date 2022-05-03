@@ -1,0 +1,2 @@
+The global variable doesnt get incremented because it is a cpoy of the old var.
+Using fork the whole programmmemory gets copied to make the child.
