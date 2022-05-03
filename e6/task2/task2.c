@@ -4,6 +4,7 @@
 #include <sys/wait.h>
 #include <unistd.h>
 #include <pthread.h>
+#include "myqueue.h"
 
 int global = 0;
 
@@ -12,7 +13,6 @@ void *myThreadFun(void *vargp)
   int value = *((int *)vargp);
   global += value;
 
-  // printf("Value %d, Sum %d\n", value, g);
   return NULL;
 }
 
