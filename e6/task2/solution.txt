@@ -1,0 +1,2 @@
+Yes, but for every thread there would have to be a separate semaphore witch can get very messy and is not easy to maintain.
+In this case there would be 5 semaphores and every single one of them waits ans ist released separatly. 

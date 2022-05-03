@@ -6,24 +6,16 @@
 #include <stdbool.h>
 #include <pthread.h>
 #include "myqueue.h"
+#include <stdint.h>
 
 #define CHILDREN 5
 
 pthread_mutex_t mut = PTHREAD_MUTEX_INITIALIZER;
-int global = 0;
-
-typedef struct thread_data
-{
-  int index;
-  myqueue *q;
-} thread_data;
+myqueue *q;
 
 void *myThreadFun(void *vargp)
 {
-  thread_data *td = (thread_data *)vargp;
-  myqueue *q = (myqueue *)td->q;
-
-  int val = -1, sum = 0;
+  int val, sum = 0;
   bool b = true;
   while (b)
   {
@@ -31,7 +23,6 @@ void *myThreadFun(void *vargp)
     if (!myqueue_is_empty(q))
     {
       val = myqueue_pop(q);
-      fflush(stdout);
       sum += val;
       if (val == 0)
       {
@@ -40,43 +31,52 @@ void *myThreadFun(void *vargp)
     }
     pthread_mutex_unlock(&mut);
   }
+  int *ret = malloc(sizeof(int));
+  *ret = sum;
 
-  global += sum;
-
-  printf("Consumer %i sum :%d\n", td->index, sum);
-  return NULL;
+  printf("Consumer %d sum: %d\n", *(int *)vargp, sum);
+  free(vargp);
+  return (void *)ret;
 }
 
 int main()
 {
-  myqueue *q = malloc(sizeof(myqueue));
+  q = malloc(sizeof(myqueue));
   myqueue_init(q);
 
   pthread_t threads[CHILDREN];
   for (int i = 0; i < CHILDREN; i++)
   {
-    thread_data *td = malloc(sizeof(thread_data));
-    td->index = i;
-    td->q = q;
-
-    pthread_create(&threads[i], NULL, myThreadFun, (void *)td);
+    int *p = malloc(sizeof(void *));
+    *p = i;
+    pthread_create(&threads[i], NULL, myThreadFun, (void *)p);
   }
 
   for (size_t i = 0; i < 100000; i++)
   {
+    pthread_mutex_lock(&mut);
     myqueue_push(q, 1);
+    pthread_mutex_unlock(&mut);
   }
   for (size_t i = 0; i < CHILDREN; i++)
   {
+    pthread_mutex_lock(&mut);
     myqueue_push(q, 0);
+    pthread_mutex_unlock(&mut);
   }
 
+  int allsum = 0;
   for (int i = 0; i < CHILDREN; i++)
   {
-    pthread_join(threads[i], NULL);
+    int *child_sum;
+    pthread_join(threads[i], (void **)&child_sum);
+
+    int a = *child_sum;
+    free(child_sum);
+    allsum += a;
   }
 
-  printf("Final sum: %d\n", global);
+  printf("Final sum: %d\n", allsum);
   fflush(stdout);
   pthread_exit(NULL);
   return 0;
