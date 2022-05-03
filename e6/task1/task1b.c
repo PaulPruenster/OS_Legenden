@@ -11,18 +11,11 @@ int g = 0;
 // The function to be executed by all threads
 void *myThreadFun(void *vargp)
 {
-  // Store the value argument passed to this thread
-  int *myid = (int *)vargp;
+  int value = *((int *)vargp);
+  g += value;
 
-  // Let us create a static variable to observe its changes
-  static int s = 0;
-
-  // Change static and global variables
-  ++s;
-  ++g;
-
-  // Print the argument, static and global variables
-  printf("Thread ID: %d, Static: %d, Global: %d\n", *myid, ++s, ++g);
+  // printf("Value %d, Sum %d\n", value, g);
+  return NULL;
 }
 
 int main(int argc, char *argv[])
@@ -34,11 +27,17 @@ int main(int argc, char *argv[])
   }
 
   int i;
-  pthread_t tid;
 
   // Let us create three threads
-  for (i = 0; i < 3; i++)
-    pthread_create(&tid, NULL, myThreadFun, (void *)&tid);
+  for (i = 1; i < argc; i++)
+  {
+    int val = atoi(argv[i]);
+    pthread_t tid;
+    pthread_create(&tid, NULL, myThreadFun, (void *)&val);
+
+    pthread_join(tid, NULL);
+    printf("sum%d = %d\n", i, g);
+  }
 
   pthread_exit(NULL);
   return 0;
