@@ -7,14 +7,17 @@
 
 int counter = 1;
 
-int main() {
+int main()
+{
 	pid_t wpid;
 	int status = 0;
 	printf("%d\n", counter);
-	if(fork() == 0) {
+	if (fork() == 0)
+	{
 		counter += 1;
 		exit(0);
 	}
-	while((wpid = wait(&status)) > 0);
+	while ((wpid = wait(&status)) > 0)
+		;
 	printf("%d\n", counter);
 }

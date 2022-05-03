@@ -1,4 +1,4 @@
-CFLAGS = -std=c11 -Wall -Wextra -Wpedantic #-fsanitize=address -Wconversion
+CFLAGS = -std=c11 -Wall -Wextra -Wpedantic -pthread #-fsanitize=address -Wconversion
 
 .PHONY: all clean
 all: task1a task1b
