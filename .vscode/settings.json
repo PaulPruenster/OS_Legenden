@@ -3,7 +3,8 @@
     "mman.h": "c",
     "stat.h": "c",
     "semaphore.h": "c",
-    "stdlib.h": "c"
+    "stdlib.h": "c",
+    "myqueue.h": "c"
   },
   "C_Cpp.errorSquiggles": "EnabledIfIncludesResolve"
 }

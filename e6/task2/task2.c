@@ -3,39 +3,74 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 #include <unistd.h>
+#include <stdbool.h>
 #include <pthread.h>
 #include "myqueue.h"
 
-int global = 0;
+#define CHILDREN 5
+
+pthread_mutex_t mut = PTHREAD_MUTEX_INITIALIZER;
 
 void *myThreadFun(void *vargp)
 {
-  int value = *((int *)vargp);
-  global += value;
+  myqueue *q = (myqueue *)vargp;
 
-  return NULL;
+  int val = -1, sum = 0;
+  bool b = true;
+  while (b)
+  {
+    pthread_mutex_lock(&mut);
+    if (!myqueue_is_empty(q))
+    {
+      val = myqueue_pop(q);
+      fflush(stdout);
+      sum += val;
+      if (val == 0)
+      {
+        b = false;
+      }
+    }
+    pthread_mutex_unlock(&mut);
+  }
+  // printf("Sum %d\n", sum);
+  void *ret = malloc(sizeof(void *));
+  ret = (void *)(&sum);
+
+  printf("Pointer after cast :%d\n", *((int *)ret));
+  return ret;
 }
 
-int main(int argc, char *argv[])
+int main()
 {
-  if (argc < 2)
+  myqueue *q = malloc(sizeof(myqueue));
+  myqueue_init(q);
+
+  pthread_t threads[CHILDREN];
+  for (int i = 0; i < CHILDREN; i++)
   {
-    printf("Usage: %s <list of numbers>\n", argv[0]);
-    return EXIT_FAILURE;
+    pthread_create(&threads[i], NULL, myThreadFun, (void *)q);
   }
 
-  int i;
-
-  for (i = 1; i < argc; i++)
+  for (size_t i = 0; i < 100000; i++)
   {
-    int val = atoi(argv[i]);
-    pthread_t tid;
-    pthread_create(&tid, NULL, myThreadFun, (void *)&val);
-
-    pthread_join(tid, NULL);
-    printf("sum%d = %d\n", i, global);
+    myqueue_push(q, 1);
+  }
+  for (size_t i = 0; i < CHILDREN; i++)
+  {
+    myqueue_push(q, 0);
   }
 
+  int allsum = 0;
+  for (int i = 0; i < CHILDREN; i++)
+  {
+    void *child_sum;
+    pthread_join(threads[i], &child_sum);
+    allsum += *((int *)child_sum);
+    printf("sum_child %d, all %d\n", *((int *)child_sum), allsum);
+  }
+
+  printf("Total sum: %d\n", allsum);
+  fflush(stdout);
   pthread_exit(NULL);
   return 0;
 }
