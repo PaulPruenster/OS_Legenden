@@ -1,0 +1,3 @@
+The task3 solution is way slower than the task2 because every child waits for the signal an then the first one locks the mutex all the other ones waot for the next signal.
+
+Our solution sadly doesnt always work with 100000 bit with 1000 every time.

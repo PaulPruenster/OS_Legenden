@@ -9,28 +9,29 @@
 #include <stdint.h>
 
 #define CHILDREN 5
-#define MAXITER 100000
+#define MAXITER 1000
 
-pthread_mutex_t mut = PTHREAD_MUTEX_INITIALIZER;
+// pthread_mutex_t mut = PTHREAD_MUTEX_INITIALIZER;
 myqueue *q;
+pthread_cond_t cond;
+pthread_mutex_t mutex;
 
 void *myThreadFun(void *vargp)
 {
-  int val, sum = 0;
+  int val = -1, sum = 0;
   bool b = true;
   while (b)
   {
-    pthread_mutex_lock(&mut);
-    if (!myqueue_is_empty(q))
+    pthread_mutex_lock(&mutex);
+    pthread_cond_wait(&cond, &mutex);
+    val = myqueue_pop(q);
+    sum += val;
+    if (val == 0)
     {
-      val = myqueue_pop(q);
-      sum += val;
-      if (val == 0)
-      {
-        b = false;
-      }
+      b = false;
     }
-    pthread_mutex_unlock(&mut);
+
+    pthread_mutex_unlock(&mutex);
   }
   int *ret = malloc(sizeof(int));
   *ret = sum;
@@ -44,6 +45,8 @@ int main()
 {
   q = malloc(sizeof(myqueue));
   myqueue_init(q);
+  pthread_cond_init(&cond, NULL);
+  pthread_mutex_init(&mutex, NULL);
 
   pthread_t threads[CHILDREN];
   for (int i = 0; i < CHILDREN; i++)
@@ -55,15 +58,17 @@ int main()
 
   for (size_t i = 0; i < MAXITER; i++)
   {
-    pthread_mutex_lock(&mut);
+    pthread_mutex_lock(&mutex);
     myqueue_push(q, 1);
-    pthread_mutex_unlock(&mut);
+    pthread_mutex_unlock(&mutex);
+    pthread_cond_signal(&cond);
   }
   for (size_t i = 0; i < CHILDREN; i++)
   {
-    pthread_mutex_lock(&mut);
+    pthread_mutex_lock(&mutex);
     myqueue_push(q, 0);
-    pthread_mutex_unlock(&mut);
+    pthread_mutex_unlock(&mutex);
+    pthread_cond_signal(&cond);
   }
 
   int allsum = 0;
@@ -79,6 +84,7 @@ int main()
 
   printf("Final sum: %d\n", allsum);
   fflush(stdout);
-  pthread_exit(NULL);
+  pthread_cond_destroy(&cond);
+  pthread_mutex_destroy(&mutex);
   return 0;
 }
