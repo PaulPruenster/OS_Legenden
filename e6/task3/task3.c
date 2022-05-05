@@ -8,8 +8,8 @@
 #include "myqueue.h"
 #include <stdint.h>
 
-#define CHILDREN 5
-#define MAXITER 1000
+#define CHILDREN 500
+#define MAXITER 100000
 
 // pthread_mutex_t mut = PTHREAD_MUTEX_INITIALIZER;
 myqueue *q;
@@ -23,7 +23,10 @@ void *myThreadFun(void *vargp)
   while (b)
   {
     pthread_mutex_lock(&mutex);
-    pthread_cond_wait(&cond, &mutex);
+    while (myqueue_is_empty(q)) // Lei worten wenn koene elemente mehr drinen sein
+    {
+      pthread_cond_wait(&cond, &mutex);
+    }
     val = myqueue_pop(q);
     sum += val;
     if (val == 0)
