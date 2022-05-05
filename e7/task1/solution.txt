@@ -1,0 +1,25 @@
+Observations: An atomic is faster compared to a mutex. 
+
+Atomic: 
+real	0m0.216s
+user	0m0.680s
+sys	0m0.044s
+
+Atomic o3: 
+real	0m0.231s
+user	0m0.748s
+sys	0m0.044s
+
+Mutex: 
+real	0m0.877s
+user	0m1.497s
+sys	0m1.890s
+
+Mutex o3: 
+real	0m0.791s
+user	0m1.347s
+sys	0m1.687s
+
+As you can tell from the results, the main difference between these two methods are, 
+how mutex and atomic work. 
+Mutex locks the thread and passes the control to the os with a context switch. Atomics instead try to access/modify the value unless they are finally able to.
