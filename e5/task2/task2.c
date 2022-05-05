@@ -141,7 +141,7 @@ int main(int argc, char *argv[])
     return EXIT_FAILURE;
   }
   sem_init(&semadata->WRITE, 1, 1);
-  sem_init(&semadata->CONSUME, 1, 0);
+  sem_init(&semadata->CONSUME, b, 0); // B statt 1, dass er erst alle pushed
 
   char *name = "/shared_mem";
   const uint64_t shared_mem_size = (b + 1) * sizeof(uint64_t);
@@ -175,7 +175,9 @@ int main(int argc, char *argv[])
     exit(0);
   }
 
-  wait(NULL); // wait for both forks
+  int status = 0;
+	while(wait(&status) >= 0);
+
   close_shm(structdata, semadata);
   shm_unlink(name);     // delete shared memory
   shm_unlink(name_sem); // delete shared memory
