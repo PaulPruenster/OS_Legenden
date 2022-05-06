@@ -62,22 +62,29 @@ void *thread(void *arg)
             computeLoser(shared);
 
         // all threads wait for computeUser and then eliminate themself
-        pthread_barrier_wait(&shared->barrier); // ?: do we need to wait for it?
-
-        // Eliminating the player(s) who have lost.
-        if (shared->values[thread_data->thread_id] == PLAYER_LOST)
+        // ?: do we need to wait for it?
+        if (pthread_barrier_wait(&shared->barrier) == PTHREAD_BARRIER_SERIAL_THREAD)
         {
-            printf("Eliminating player %i\n", thread_data->thread_id);
-            shared->values[thread_data->thread_id] = PLAYER_DEAD; // so players are not eliminated every round
+            // Eliminating the player(s) who have lost.
+            for (int i = 0; i < PLAYERS; i++)
+            {
+                if (shared->values[i] == PLAYER_LOST)
+                {
+                    printf("Eliminating player %i\n", i);
+                    shared->values[i] = PLAYER_DEAD; // so players are not eliminated every round
+                }
+            }
             printf("---------------------\n");
         }
+
         pthread_barrier_wait(&shared->barrier);
-        // if (pthread_barrier_wait(&shared->barrier) == PTHREAD_BARRIER_SERIAL_THREAD)
 
     } while (thread_data->data->player_counter > 1); // game loop, continues until no players are left or we have a winner.
 
-    if (shared->player_counter == 0)
-        printf("All players were eliminated!\n");
+    // To prevent both threads printing the message
+    if (pthread_barrier_wait(&shared->barrier) == PTHREAD_BARRIER_SERIAL_THREAD)
+        if (shared->player_counter == 0)
+            printf("All players were eliminated!\n");
 
     if (thread_data->data->values[thread_data->thread_id] != PLAYER_DEAD)
         printf("Player %d has won the game!\n", thread_data->thread_id);
