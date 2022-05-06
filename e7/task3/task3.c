@@ -68,11 +68,11 @@ void *thread(void *arg)
         if (shared->values[thread_data->thread_id] == PLAYER_LOST)
         {
             printf("Eliminating player %i\n", thread_data->thread_id);
-            shared->values[thread_data->thread_id] = PLAYER_DEAD;
-        }
-
-        if (pthread_barrier_wait(&shared->barrier) == PTHREAD_BARRIER_SERIAL_THREAD)
+            shared->values[thread_data->thread_id] = PLAYER_DEAD; // so players are not eliminated every round
             printf("---------------------\n");
+        }
+        pthread_barrier_wait(&shared->barrier);
+        // if (pthread_barrier_wait(&shared->barrier) == PTHREAD_BARRIER_SERIAL_THREAD)
 
     } while (thread_data->data->player_counter > 1); // game loop, continues until no players are left or we have a winner.
 
@@ -82,7 +82,7 @@ void *thread(void *arg)
     if (thread_data->data->values[thread_data->thread_id] != PLAYER_DEAD)
         printf("Player %d has won the game!\n", thread_data->thread_id);
 
-    return NULL;
+    return NULL; // implicit termination of thread
 }
 
 int main()
