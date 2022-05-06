@@ -4,7 +4,8 @@
     "stat.h": "c",
     "semaphore.h": "c",
     "stdlib.h": "c",
-    "myqueue.h": "c"
+    "myqueue.h": "c",
+    "unistd.h": "c"
   },
   "C_Cpp.errorSquiggles": "EnabledIfIncludesResolve"
 }

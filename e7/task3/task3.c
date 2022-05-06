@@ -3,7 +3,8 @@
 #include <pthread.h>
 #include <time.h>
 
-#define PLAYER_LOST -1
+#define PLAYER_LOST 7
+#define PLAYER_DEAD 8
 #define PLAYERS 5
 
 // https://godbolt.org/z/3YdsEvPoe
@@ -11,7 +12,6 @@ typedef struct SharedData
 {
     int values[PLAYERS];
     pthread_barrier_t barrier;
-    pthread_barrierattr_t attr;
     int player_counter;
 } SharedData;
 
@@ -54,45 +54,33 @@ void *thread(void *arg)
 
     do
     {
-        // each thread should roll the dice
-        rollTheDice(thread_data);
+        if (shared->values[thread_data->thread_id] != PLAYER_DEAD)
+            rollTheDice(thread_data);
 
         // wait for each thread to finish rolling the dice and computing the looser(s)
         if (pthread_barrier_wait(&shared->barrier) == PTHREAD_BARRIER_SERIAL_THREAD)
-        {
-            printf("---------------------\n");
             computeLoser(shared);
 
-            // I don't know whether this is correct or not, found it on a website, I am trying to somehow change the count for the
-            // barrier, because my barrier should wait for less threads now, because I am eliminating threads. If I don't do this, I will
-            // wait forever. For some reason, it doesn't work as expected.
-            pthread_barrierattr_setpshared(&thread_data->data->attr, thread_data->data->player_counter);
-
-            // Another approach I tried was to destroy an re-create my barrier, didn't work either.
-            // pthread_barrier_destroy(&shared->barrier);
-            // if (pthread_barrier_init(&shared->barrier, NULL, shared->player_counter) != 0)
-            // {
-            //     perror("Could not create barrier");
-            //     return NULL;
-            // }
-        }
-        // I wait for each thread to reach this point, which means, everey player has rolled the dice and we already computed, who is the looser and
-        // gets eliminated.
-        pthread_barrier_wait(&shared->barrier);
+        // all threads wait for computeUser and then eliminate themself
+        pthread_barrier_wait(&shared->barrier); // ?: do we need to wait for it?
 
         // Eliminating the player(s) who have lost.
         if (shared->values[thread_data->thread_id] == PLAYER_LOST)
         {
             printf("Eliminating player %i\n", thread_data->thread_id);
-            pthread_exit(NULL);
+            shared->values[thread_data->thread_id] = PLAYER_DEAD;
         }
-        pthread_barrier_wait(&thread_data->data->barrier);
+
+        if (pthread_barrier_wait(&shared->barrier) == PTHREAD_BARRIER_SERIAL_THREAD)
+            printf("---------------------\n");
 
     } while (thread_data->data->player_counter > 1); // game loop, continues until no players are left or we have a winner.
 
-    for (size_t i = 0; i < PLAYERS; i++)
-        if (thread_data->data->values[i] != PLAYER_LOST)
-            printf("Player %ld has won the game!\n", i);
+    if (shared->player_counter == 0)
+        printf("All players were eliminated!\n");
+
+    if (thread_data->data->values[thread_data->thread_id] != PLAYER_DEAD)
+        printf("Player %d has won the game!\n", thread_data->thread_id);
 
     return NULL;
 }
@@ -105,14 +93,10 @@ int main()
 
     ThreadData thread_data[PLAYERS];
 
-    pthread_barrierattr_t attr;
-    pthread_barrierattr_init(&attr);
-
     srand(time(NULL));
-    if (pthread_barrier_init(&data.barrier, &attr, PLAYERS) != 0)
+    if (pthread_barrier_init(&data.barrier, NULL, PLAYERS) != 0)
         return EXIT_FAILURE;
 
-    data.attr = attr;
     for (int i = 0; i < PLAYERS; i++)
     {
         thread_data[i].data = &data;
