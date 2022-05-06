@@ -1,4 +1,4 @@
-CFLAGS = -Wall -Wextra -pedantic -std=c11 -pthread
+CFLAGS = -Wall -Wextra -g -pedantic -std=c11 -O3 -pthread -D_DEFAULT_SOURCE
 
 .PHONY: all clean
 all: task3
