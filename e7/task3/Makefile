@@ -1,4 +1,4 @@
-CFLAGS = -Wall -Wextra -pedantic -O3 -pthread -D_DEFAULT_SOURCE -std=c11 # if you are on zid, remove -std=c11
+CFLAGS = -Wall -Wextra -pedantic -O3 -pthread -D_DEFAULT_SOURCE #-std=c11 we removed -std=c11, in order to compile on zid
 
 .PHONY: all clean
 all: task3
