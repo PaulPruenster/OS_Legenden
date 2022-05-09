@@ -21,8 +21,7 @@ void *thread(void *param)
         pthread_mutex_unlock(&mutex); */
 
         // atomics: 
-        atomic_fetch_sub(&atomic_counter, 1); // idk ob i de funktion brauch oder ob des: 
-        // atomic_counter--; reicht, performance isch eigentlich die gleiche
+        atomic_fetch_sub(&atomic_counter, 1);
     }
     return NULL;
 }

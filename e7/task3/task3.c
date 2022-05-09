@@ -54,17 +54,15 @@ void *thread(void *arg)
 
     do
     {
-        if (shared->values[thread_data->thread_id] != PLAYER_DEAD)
+        if (shared->values[thread_data->thread_id] != PLAYER_DEAD)   
             rollTheDice(thread_data);
+        
 
         // wait for each thread to finish rolling the dice and computing the looser(s)
-        if (pthread_barrier_wait(&shared->barrier) == PTHREAD_BARRIER_SERIAL_THREAD)
+        if (pthread_barrier_wait(&shared->barrier) == PTHREAD_BARRIER_SERIAL_THREAD) 
+        {
             computeLoser(shared);
 
-        // all threads wait for computeUser and then eliminate themself
-        // ?: do we need to wait for it?
-        if (pthread_barrier_wait(&shared->barrier) == PTHREAD_BARRIER_SERIAL_THREAD)
-        {
             // Eliminating the player(s) who have lost.
             for (int i = 0; i < PLAYERS; i++)
             {
@@ -77,6 +75,7 @@ void *thread(void *arg)
             printf("---------------------\n");
         }
 
+        // all threads wait for computeUser elimination themself
         pthread_barrier_wait(&shared->barrier);
 
     } while (thread_data->data->player_counter > 1); // game loop, continues until no players are left or we have a winner.
