@@ -1,10 +1,5 @@
 Observations: An atomic is faster compared to a mutex. 
 
-Atomic: 
-real	0m0.216s
-user	0m0.680s
-sys	0m0.044s
-
 Atomic o3: 
 	User time (seconds): 0.67
 	System time (seconds): 0.04
