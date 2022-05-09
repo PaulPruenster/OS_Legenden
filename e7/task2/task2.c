@@ -100,6 +100,7 @@ int main()
 
     printf("Final sum: %d\n", allsum);
     fflush(stdout);
+    free(q);
     pthread_cond_destroy(&cond);
     pthread_mutex_destroy(&mutex);
     return 0;
