@@ -8,9 +8,10 @@
 #include "myqueue.h"
 #include <stdint.h>
 #include <stdatomic.h>
+#include <math.h>
 
 #define CHILDREN 2
-#define MAXITER 10000000
+#define MAXITER pow(10,7)
 
 #if USE_MY_MUTEX
 #define my_mutex_lock(m) while (atomic_flag_test_and_set(m))
