@@ -11,7 +11,7 @@
 #include <math.h>
 
 #define CHILDREN 2
-#define MAXITER pow(10,7)
+#define MAXITER pow(10, 6)
 
 #if USE_MY_MUTEX
 #define my_mutex_lock(m) while (atomic_flag_test_and_set(m))
@@ -38,7 +38,7 @@ void *myThreadFun(void *vargp)
         MUTEX_LOCK(&mutex);
         if (!myqueue_is_empty(q))
         {
-            //pthread_cond_wait(&cond, &mutex);
+            // pthread_cond_wait(&cond, &mutex);
             val = myqueue_pop(q);
             sum += val;
             if (val == 0)
@@ -77,14 +77,14 @@ int main()
         MUTEX_LOCK(&mutex);
         myqueue_push(q, 1);
         MUTEX_UNLOCK(&mutex);
-        //pthread_cond_signal(&cond);
+        // pthread_cond_signal(&cond);
     }
     for (size_t i = 0; i < CHILDREN; i++)
     {
         MUTEX_LOCK(&mutex);
         myqueue_push(q, 0);
         MUTEX_UNLOCK(&mutex);
-        //pthread_cond_signal(&cond);
+        // pthread_cond_signal(&cond);
     }
 
     int allsum = 0;
