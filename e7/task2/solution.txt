@@ -56,3 +56,14 @@ Final sum: 10000000
         Signals delivered: 0
         Page size (bytes): 4096
         Exit status: 0
+
+
+A user-mode spinlock IS NEVER more efficient than a lock that the OS provides.
+The reason is simple, that OS locks are wired to the OS scheduler. So if a lock tries to lock a lock and fails - 
+the OS knows to freeze this thread and not reschedule it to run until the lock has been released.
+
+With user-mode spinlocks, this doesn't happen. The OS can't know that the relevant thread tries to acquire to the lock in a tight loop.
+Yielding is just a patch and not a solution - we want to spin for a short time, then go to sleep until the lock is released. With user mode spin locks,
+we might waste the entire thread quantum trying to lock the spinlock and yielding.
+
+https://stackoverflow.com/questions/66194016/can-stdatomic-be-used-sometimes-instead-of-stdmutex-in-c
