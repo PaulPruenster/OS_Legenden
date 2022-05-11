@@ -4,26 +4,35 @@
 #include <stdlib.h>
 #include <stdatomic.h>
 
-#define NUM_THREADS 5000
+#define NUM_THREADS 30000
 
-atomic_int global = NUM_THREADS;
-
-void *main_thread()
+void *thread(void *arg)
 {
-  atomic_fetch_sub(&global, 1);
+  atomic_fetch_sub((atomic_int *)arg, 1);
   return NULL;
 }
 
-int main(void)
+void printError()
 {
-  printf("Before: %i\n", global);
+  perror("Not enougth pthreads available!\n");
+  exit(EXIT_FAILURE);
+}
+
+int main()
+{
+  atomic_int number = NUM_THREADS;
+
+  printf("Before: %i\n", number);
 
   pthread_t threads[NUM_THREADS];
   for (int i = 0; i < NUM_THREADS; ++i)
-    pthread_create(&threads[i], NULL, main_thread, NULL);
-  for (int i = 0; i < NUM_THREADS; ++i)
-    pthread_join(threads[i], NULL);
+    if (pthread_create(&threads[i], NULL, thread, &number) != 0)
+      printError();
 
-  printf("After: %i\n", global);
+  for (int i = 0; i < NUM_THREADS; ++i)
+    if (pthread_join(threads[i], NULL) != 0)
+      printError();
+
+  printf("After: %i\n", number);
   return EXIT_SUCCESS;
 }
