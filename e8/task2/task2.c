@@ -35,7 +35,6 @@ static int STOP = 1;
 
 static void handler()
 {
-    fprintf(stdout, "finito\n");
     close(sockfd);
     close(connfd);
     exit(0);
