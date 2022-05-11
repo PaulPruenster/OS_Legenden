@@ -10,7 +10,7 @@
 #include <stdatomic.h>
 #include <math.h>
 
-#define CHILDREN 2
+#define CHILDREN 50
 #define MAXITER pow(10, 7)
 
 #if USE_MY_MUTEX
