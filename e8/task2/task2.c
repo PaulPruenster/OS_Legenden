@@ -64,9 +64,8 @@ void func(int connfd)
 
 int main()
 {
-    struct sigaction psa;
-    psa.sa_handler = &handler;
-    sigaction(SIGINT, &psa, NULL);
+    struct sigaction sa = {.sa_handler = handler};
+    sigaction(SIGINT, &sa, 0);
 
     struct sockaddr_in servaddr, cli;
     socklen_t peer_addr_size;

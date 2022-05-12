@@ -7,3 +7,6 @@ clean:
 
 task2: task2.c
 	$(CC) $(CFLAGS) -o $@ $^  -lrt
+
+val:
+	 valgrind --tool=memcheck --leak-check=full -s ./task2

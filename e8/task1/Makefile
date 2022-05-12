@@ -12,4 +12,4 @@ task1b: task1b.c
 	$(CC) $(CFLAGS) -o $@ $^
 
 val:
-	 valgrind --tool=memcheck ./task1b
+	 valgrind --tool=memcheck --leak-check=full -s ./task1b
