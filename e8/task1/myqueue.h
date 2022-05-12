@@ -13,7 +13,6 @@ typedef struct myqueue_entry
 {
   job_function job_fun;
   job_arg arg;
-
   STAILQ_ENTRY(myqueue_entry)
   entries;
 } myqueue_entry;

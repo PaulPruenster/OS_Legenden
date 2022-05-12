@@ -31,7 +31,7 @@ void *myThreadFun(void *vargp)
       myqueue_entry *entry = myqueue_pop(pool->q);
 
       entry->job_fun(entry->arg); // call the function like job_fun(arg)
-      // entry->finished = 1; TODO
+      entry->arg = NULL;
     }
     pthread_mutex_unlock(&mut);
   }
@@ -66,6 +66,7 @@ job_id pool_submit(thread_pool *pool, job_function start_routine, job_arg arg)
   myqueue_entry *entry = malloc(sizeof(entry));
   entry->arg = arg;
   entry->job_fun = start_routine;
+  // entry->finito = false;
 
   pthread_mutex_lock(&mut);
   myqueue_push(pool->q, entry);
@@ -76,7 +77,7 @@ job_id pool_submit(thread_pool *pool, job_function start_routine, job_arg arg)
 
 void pool_await(job_id id)
 {
-  while (0) // TODO worn zb mit an boolean
+  while (id->arg != NULL)
     ;
   free(id);
 }
