@@ -47,16 +47,20 @@ void func(int connfd)
     {
         bzero(buff, MAX);
         // read the message from client and copy it in buffer
-        if (!recv(connfd, buff, sizeof(buff), 0))
+        if (!recv(connfd, buff, sizeof(buff), 0)){
+            printf("Client disconnected\n");
             return;
+        }
 
         // print buffer which contains the client contents
         printf("Echo: %s", buff);
-        if (strncmp("/shutdown", buff, 9) == 0)
+
+        // 11 string with \n\0 and 9 without
+        if (strlen(buff) == 11 && strncmp("/shutdown", buff, 9) == 0)
         {
             printf("Shutting down.\n");
             STOP = 0;
-            break;
+            return;
         }
         bzero(buff, MAX);
     }
@@ -81,7 +85,7 @@ int main()
     servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
     servaddr.sin_port = htons(PORT);
 
-    // cheat that server can be rerun aber close
+    // cheat that server can be rerun after close
     int opt_val = 1;
     setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &opt_val, sizeof opt_val);
 
