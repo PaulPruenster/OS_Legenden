@@ -47,12 +47,17 @@ void pool_create(thread_pool *pool, size_t size)
   }
 
   // create the queue
-  myqueue *q = malloc(sizeof(myqueue));
+  myqueue *q = malloc(sizeof(myqueue *));
+  if (q == NULL)
+  {
+    perror("Could not create queue!\n");
+    return;
+  }
   myqueue_init(q);
   pool->q = q;
 
   // create workers that consume the jobs
-  pthread_t *workers = malloc(sizeof(pthread_t *) * size);
+  pthread_t *workers = malloc(sizeof(pthread_t) * size);
   for (size_t i = 0; i < size; i++)
     pthread_create(&workers[i], NULL, myThreadFun, pool);
 
@@ -66,7 +71,6 @@ job_id pool_submit(thread_pool *pool, job_function start_routine, job_arg arg)
   myqueue_entry *entry = malloc(sizeof(entry));
   entry->arg = arg;
   entry->job_fun = start_routine;
-  // entry->finito = false;
 
   pthread_mutex_lock(&mut);
   myqueue_push(pool->q, entry);

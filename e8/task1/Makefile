@@ -10,3 +10,6 @@ task1a: task1a.c
 
 task1b: task1b.c
 	$(CC) $(CFLAGS) -o $@ $^
+
+val:
+	 valgrind --tool=memcheck ./task1b
