@@ -48,20 +48,12 @@ static void handler()
 
 void *job(void *arg)
 {
-    /*
-    For each client that connects, a connection handler function is executed:
-
-      [x] Each connection handler function should be run in your thread pool from task 1.
-      [x] To simulate a real workload, the handler begins by sleeping for 100 milliseconds.
-      [ ] The handler then "parses" the incoming HTTP request and responds accordingly (see below).
-
-    */
     usleep(100000);
 
     char *message = (char *)arg;
 
     // 11 string with \n\0 and 9 without
-    //
+    // skip first 4 character of message, they are always 'GET '
     if (strncmp("/shutdown", message + 4, 9) == 0)
     {
         printf("Shutting down.\n");
@@ -70,7 +62,7 @@ void *job(void *arg)
 
     char *ret = "HTTP/1.1 200 OK\r\ncontent-type:text/html\r\ncontent-length:32\r\n\r\nhttps://i.imgflip.com/68ok5u.jpg";
 
-    // lost hours to invalid send size: 1.5
+    // lost hours to invalid send-size: 1.5
     int error = send(connfd, ret, strlen(ret) + 1, 0);
     printf("Send: %i\n", error);
     fflush(stdout);
@@ -83,7 +75,7 @@ void func(int connfd)
     char *buff = malloc(MAX * sizeof(char));
     for (;;)
     {
-        //    read the message from client and copy it in buffer
+        // read the message from client and copy it in buffer
         if (!recv(connfd, buff, MAX, 0))
         {
             printf("Client disconnected\n");
