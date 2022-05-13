@@ -13,7 +13,7 @@
 
 #include "pool.h"
 
-#define MAX 1000 * 100
+#define MAX 1000
 #define PORT 42069
 #define SA struct sockaddr
 
@@ -33,11 +33,9 @@
         }                                                                                                \
     } while (0)
 
-
 int sockfd, connfd;
 thread_pool *pool;
-
-static int STOP = 1;
+int STOP = 1;
 // https://www.geeksforgeeks.org/tcp-server-client-implementation-in-c/
 
 static void handler()
@@ -54,33 +52,29 @@ void *job(void *arg)
     For each client that connects, a connection handler function is executed:
 
       [x] Each connection handler function should be run in your thread pool from task 1.
-      [ ] To simulate a real workload, the handler begins by sleeping for 100 milliseconds.
+      [x] To simulate a real workload, the handler begins by sleeping for 100 milliseconds.
       [ ] The handler then "parses" the incoming HTTP request and responds accordingly (see below).
 
     */
-    useconds_t s = 100000;
-    usleep(s);
+    usleep(100000);
 
-    char* message = (char *)arg;
-    printf("%s\n", message);
-    fflush(stdout);
+    char *message = (char *)arg;
 
-    char* ret = "HTTP/1.1 200 OK\r\ncontent-type:text/html\r\ncontent-length:4\r\n\r\ntest";
+    // 11 string with \n\0 and 9 without
+    //
+    if (strncmp("/shutdown", message + 4, 9) == 0)
+    {
+        printf("Shutting down.\n");
+        STOP = 0;
+    }
+
+    char *ret = "HTTP/1.1 200 OK\r\ncontent-type:text/html\r\ncontent-length:32\r\n\r\nhttps://i.imgflip.com/68ok5u.jpg";
 
     // lost hours to invalid send size: 1.5
-    // times 10 seems to be the *magical* number, it started to worked, so we don't change anything from now on
-    int error = send(connfd, ret, sizeof(ret) * 10, 0);
-    printf
-
-    //usleep(100);
-
-    /*
-    HTTP/1.1 200 OK\r\n
-    Content-Type: text/html\r\n
-    Content-Length: <number of bytes in message body, including newlines>\r\n
-    \r\n
-    Echo: <message>
-    */
+    int error = send(connfd, ret, strlen(ret) + 1, 0);
+    printf("Send: %i\n", error);
+    fflush(stdout);
+    free(arg);
     return NULL;
 }
 
@@ -89,27 +83,17 @@ void func(int connfd)
     char *buff = malloc(MAX * sizeof(char));
     for (;;)
     {
-        bzero(buff, MAX);
-        // read the message from client and copy it in buffer
-        if (!recv(connfd, buff, sizeof(buff), 0))
+        //    read the message from client and copy it in buffer
+        if (!recv(connfd, buff, MAX, 0))
         {
             printf("Client disconnected\n");
             return;
         }
 
-        pool_submit(pool, job, (void *)buff);
+        // add first line of request to arg
+        char *arg = strtok(buff, "\n");
 
-        // print buffer which contains the client contents
-        //printf("Echo: %s", buff);
-
-        // 11 string with \n\0 and 9 without
-        if (strlen(buff) == 11 && strncmp("/shutdown", buff, 9) == 0)
-        {
-            printf("Shutting down.\n");
-            STOP = 0;
-            return;
-        }
-        bzero(buff, MAX);
+        pool_submit(pool, job, (void *)arg);
     }
     free(buff);
 }
