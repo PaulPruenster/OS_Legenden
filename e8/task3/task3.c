@@ -57,7 +57,7 @@ void *job(void *arg)
     if (strncmp("/shutdown", message + 4, 9) == 0)
     {
         printf("Shutting down.\n");
-        STOP = 0;
+        exit(0);
     }
 
     char *ret = "HTTP/1.1 200 OK\r\ncontent-type:text/html\r\ncontent-length:32\r\n\r\nhttps://i.imgflip.com/68ok5u.jpg";
@@ -73,7 +73,7 @@ void *job(void *arg)
 void func(int connfd)
 {
     char *buff = malloc(MAX * sizeof(char));
-    for (;;)
+    while (STOP)
     {
         // read the message from client and copy it in buffer
         if (!recv(connfd, buff, MAX, 0))
