@@ -5,7 +5,8 @@
     "semaphore.h": "c",
     "stdlib.h": "c",
     "myqueue.h": "c",
-    "unistd.h": "c"
+    "unistd.h": "c",
+    "pthread.h": "c"
   },
   "C_Cpp.errorSquiggles": "EnabledIfIncludesResolve"
 }
