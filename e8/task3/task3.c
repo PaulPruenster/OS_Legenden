@@ -18,7 +18,7 @@
 #define SA struct sockaddr
 
 #define THREADS 5
-
+// TODO: we definitely need to refactor this:
 #define CHECK(x, compare, errormessage)                                                                  \
     do                                                                                                   \
     {                                                                                                    \
@@ -62,7 +62,7 @@ void *job(void *arg)
 
     char *ret = "HTTP/1.1 200 OK\r\ncontent-type:text/html\r\ncontent-length:32\r\n\r\nhttps://i.imgflip.com/68ok5u.jpg";
 
-    // lost hours to invalid send-size: 1.5
+    // lost hours due to invalid send-size: 1.5
     int error = send(connfd, ret, strlen(ret) + 1, 0);
     printf("Send: %i\n", error);
     fflush(stdout);
