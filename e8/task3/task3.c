@@ -60,10 +60,10 @@ void *job(void *arg)
         exit(0);
     }
 
-    char *ret = "HTTP/1.1 200 OK\r\ncontent-type:text/html\r\ncontent-length:32\r\n\r\nhttps://i.imgflip.com/68ok5u.jpg";
+    char *ret = "HTTP/1.1 200 OK\r\ncontent-type:text/html\r\ncontent-length:56\r\n\r\n<img src=\"https://i.imgflip.com/68ok5u.jpg\" alt=\"test\"/>";
 
     // lost hours due to invalid send-size: 1.5 (@Benno & @Paul)
-    int error = send(connfd, ret, strlen(ret) + 1, 0);
+    int error = send(connfd, ret, strlen(ret), 0);
     printf("Send: %i\n", error);
     fflush(stdout);
     free(arg);
