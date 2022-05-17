@@ -27,15 +27,19 @@ void *myThreadFun(void *vargp)
 
   while (pool->running)
   {
+    myqueue_entry *entry;
     pthread_mutex_lock(&mut);
     if (!myqueue_is_empty(pool->q))
     {
-      myqueue_entry *entry = myqueue_pop(pool->q);
+      entry = myqueue_pop(pool->q);
 
+      pthread_mutex_unlock(&mut);
       entry->job_fun(entry->arg); // call the function like job_fun(arg)
       free(entry);
+    }else{
+      pthread_mutex_unlock(&mut);
+
     }
-    pthread_mutex_unlock(&mut);
   }
   return NULL;
 }

@@ -9,4 +9,4 @@ task3: task3.c
 	$(CC) $(CFLAGS) -o $@ $^ -lrt
 
 val:
-	 valgrind --tool=memcheck --leak-check=full -s ./task3
+	 valgrind --tool=memcheck --leak-check=full -s ./task3 8080
