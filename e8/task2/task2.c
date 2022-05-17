@@ -12,7 +12,6 @@
 #include <stdbool.h>
 
 #define MAX 100
-#define PORT 42069
 #define SA struct sockaddr
 
 #define CHECK(x, compare, errormessage)                                                                  \
@@ -29,6 +28,7 @@
         }                                                                                                \
     } while (0)
 
+int port; 
 int sockfd, connfd;
 static int STOP = 1;
 // https://www.geeksforgeeks.org/tcp-server-client-implementation-in-c/
@@ -66,8 +66,12 @@ void func(int connfd)
     }
 }
 
-int main()
+int main(int argc, char ** argv)
 {
+    if (argc != 2) {
+        perror("wrong amount of arguments");
+    }
+    port = atoi(argv[1]);
     struct sigaction sa = {.sa_handler = handler};
     sigaction(SIGINT, &sa, 0);
 
@@ -80,10 +84,10 @@ int main()
     printf("Socket successfully created..\n");
     bzero(&servaddr, sizeof(servaddr));
 
-    // assign IP, PORT
+    // assign IP, port
     servaddr.sin_family = AF_INET;
     servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
-    servaddr.sin_port = htons(PORT);
+    servaddr.sin_port = htons(port);
 
     // cheat that server can be rerun after close
     int opt_val = 1;
@@ -97,7 +101,7 @@ int main()
 
         CHECK((listen(sockfd, 5)), != 0, "Listen failed...\n");
 
-        printf("Listening on port %d.\n", PORT);
+        printf("Listening on port %d.\n", port);
 
         // Accept the data packet from client and verification
         connfd = accept(sockfd, (SA *)&cli, &peer_addr_size);
