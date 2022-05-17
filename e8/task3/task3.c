@@ -51,20 +51,20 @@ void *job(void *p)
     // skip first 4 character of message, they are always 'GET '
     if (strncmp("/shutdown", buff + 4, 9) == 0)
     {
-        printf("Shutting down.\n");
+        ret = "HTTP/1.1 200 OK\r\ncontent-type:text/html\r\ncontent-length:14\r\n\r\nShutting down!";
+        send(connfd, ret, strlen(ret), 0);
         pool_destroy(pool);
         pthread_cancel(listenthr); // https://stackoverflow.com/questions/9763025/memory-leaked-with-pthread-cancel-itself
+        printf("Shutting down.\n");
 
-        ret = "HTTP/1.1 200 OK\r\ncontent-type:text/html\r\ncontent-length:14\r\n\r\nShutting down!";
+
         // exit(0); // ? should we send a response to the client?
     }
-    else
+    else{
         ret = "HTTP/1.1 200 OK\r\ncontent-type:text/html\r\ncontent-length:56\r\n\r\n<img src=\"https://i.imgflip.com/68ok5u.jpg\" alt=\"test\"/>";
-
+        send(connfd, ret, strlen(ret), 0);
+    }
     // lost hours due to invalid send-size: 1.5 (@Benno & @Paul)
-    send(connfd, ret, strlen(ret), 0);
-
-    fflush(stdout);
     close(connfd);
     free(p);
     free(buff);
