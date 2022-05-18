@@ -36,9 +36,10 @@ void *myThreadFun(void *vargp)
       pthread_mutex_unlock(&mut);
       entry->job_fun(entry->arg); // call the function like job_fun(arg)
       free(entry);
-    }else{
+    }
+    else
+    {
       pthread_mutex_unlock(&mut);
-
     }
   }
   return NULL;
@@ -85,7 +86,7 @@ job_id pool_submit(thread_pool *pool, job_function start_routine, job_arg arg)
   entry->job_fun = start_routine;
 
   pthread_mutex_lock(&mut);
-  myqueue_push(pol->q, entry);
+  myqueue_push(pool->q, entry);
   pthread_mutex_unlock(&mut);
   return entry;
 }
@@ -95,13 +96,12 @@ void pool_destroy(thread_pool *pool)
   // cancel all running threads
   pool->running = false;
   for (int i = 0; i < pool->thread_count; i++)
-      pthread_join(pool->threads[i], NULL);
+    pthread_join(pool->threads[i], NULL);
 
   // free the struct
   free(pool->threads);
   free(pool->q);
   free(pool);
 }
-
 
 #endif
