@@ -1,15 +1,12 @@
 CFLAGS = -std=c11 -Wall -g -Wextra -Wpedantic -pthread #-fsanitize=address -Wconversion
 
 .PHONY: all clean
-all: task1a task1b
+all: task1
 clean:
-	$(RM) task1a task1b 
+	$(RM) task1
 
-task1a: task1a.c
-	$(CC) $(CFLAGS) -o $@ $^
-
-task1b: task1b.c
+task1: task1.c
 	$(CC) $(CFLAGS) -o $@ $^
 
 val:
-	 valgrind --tool=memcheck --leak-check=full -s ./task1b
+	 valgrind --tool=memcheck --leak-check=full -s ./task1 8080
