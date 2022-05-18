@@ -87,6 +87,14 @@ void *job(void *p)
             free(buff);
             return NULL;
         }
+
+        // TODO testen
+        char * message = malloc(sizeof(char) * MAX);
+        sprintf(message, "%s: %s", c->name, buff);
+        for (int i = 0; i < *data->server_data->clients_connected; i++) {
+            if (i != data->id && data->server_data->clients[i].connfd != NULL)
+                send(data->server_data->clients[i].connfd, buff, strlen(buff), 0);
+        }        
         
         printf("%s: %s", c->name, buff);
         fflush(stdout);    
@@ -177,7 +185,7 @@ int main(int argc, char **argv)
     pthread_create(&listenthr, NULL, listener, (void *)data);
     pthread_join(listenthr, NULL);
 
-    printf("Server is shutting down. Waiting for %d clients to be disconnected.\n", clients_connected);
+    printf("Server is shutting down. Waiting for %d clients to disconnected.\n", clients_connected);
     fflush(stdout);
     for (size_t i = 0; i < CLIENTS; i++)
         pthread_join(clients[i].thread, NULL);
