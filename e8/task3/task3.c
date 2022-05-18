@@ -61,7 +61,7 @@ void *job(void *p)
         // exit(0); // ? should we send a response to the client?
     }
     else{
-        ret = "HTTP/1.1 200 OK\r\ncontent-type:text/html\r\ncontent-length:56\r\n\r\n<img src=\"https://i.imgflip.com/68ok5u.jpg\" alt=\"test\"/>";
+        ret = "HTTP/1.1 200 OK\r\ncontent-type:text/html\r\ncontent-length:56\r\n\r\n<img src=\"\" alt=\"test\"/>";
         send(connfd, ret, strlen(ret), 0);
     }
     // lost hours due to invalid send-size: 1.5 (@Benno & @Paul)

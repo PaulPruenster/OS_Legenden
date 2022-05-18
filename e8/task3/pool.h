@@ -85,7 +85,7 @@ job_id pool_submit(thread_pool *pool, job_function start_routine, job_arg arg)
   entry->job_fun = start_routine;
 
   pthread_mutex_lock(&mut);
-  myqueue_push(pool->q, entry);
+  myqueue_push(pol->q, entry);
   pthread_mutex_unlock(&mut);
   return entry;
 }

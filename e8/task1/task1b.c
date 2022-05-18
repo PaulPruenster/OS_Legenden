@@ -9,7 +9,7 @@
 
 #define THREADS 5
 #define NUMBERS 50000
-pthread_mutex_t mut = PTHREAD_MUTEX_INITIALIZER;
+pthread_mutex_t mut = PTHREAD_MUTEX_INITIALIZER; // better without global(s)
 typedef struct thread_pool
 {
   bool running;
@@ -90,6 +90,8 @@ void pool_await(job_id id)
   while (id->arg != NULL)
     ;
   free(id);
+  // better with semaphore
+  // thread to thread semaphore, for mutex undefined behaviour 
 }
 
 void pool_destroy(thread_pool *pool)

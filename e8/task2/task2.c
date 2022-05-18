@@ -54,6 +54,7 @@ void func(int connfd)
 
         // print buffer which contains the client contents
         printf("Echo: %s", buff);
+        send(connfd, buff, strlen(buff), 0); // send it back
 
         // 11 string with \n\0 and 9 without
         if (strlen(buff) == 11 && strncmp("/shutdown", buff, 9) == 0)
@@ -99,7 +100,7 @@ int main(int argc, char ** argv)
     while (STOP)
     {
 
-        CHECK((listen(sockfd, 5)), != 0, "Listen failed...\n");
+        CHECK((listen(sockfd, 5)), != 0, "Listen failed...\n"); // should be moved before the while-loop
 
         printf("Listening on port %d.\n", port);
 
