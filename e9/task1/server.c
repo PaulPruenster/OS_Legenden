@@ -3,13 +3,17 @@
 #include <netinet/in.h>
 #include <stdlib.h>
 #include <string.h>
+#include <unistd.h>
 #include <sys/socket.h>
 #include <sys/types.h>
 #include <unistd.h>
 #include <signal.h>
+#include <pthread.h>
 #include <string.h>
 #include <strings.h>
+#include <stdatomic.h>
 #include <stdbool.h>
+#include <semaphore.h>
 
 #define MAX 1000
 #define SA struct sockaddr
@@ -28,8 +32,19 @@ typedef struct myclient_struct
     pthread_t thread;
     int connfd;
     char name[100];
-    bool finished;
 } myclient;
+
+typedef struct server_data
+{
+    myclient *clients;
+    atomic_int clients_connected;
+} server_data;
+
+typedef struct client_thread_data
+{
+    server_data *server_data;
+    int id;
+} client_thread_data;
 
 static void handler()
 {
@@ -39,11 +54,15 @@ static void handler()
 
 void *job(void *p)
 {
-    myclient *c = ((myclient *)p);
+    client_thread_data *data = (client_thread_data *)p;
+    printf("id: %d\n", data->id);
+    printf("Connfd: %d\n", data->server_data->clients[data->id].connfd);
+    myclient *c = &(data->server_data->clients[data->id]); // katastrophe
+
     char *buff = malloc(MAX * sizeof(char));
     recv(c->connfd, buff, MAX, 0);
     strcpy(c->name, buff); // destination, source
-    printf("%s connected\n",c->name);
+    printf("%s connected\n", c->name);
     fflush(stdout);
 
     while (1)
@@ -53,29 +72,30 @@ void *job(void *p)
             free(p);
             free(buff);
             printf("Client disconnected\n");
-            c->finished = true;
-            return NULL;
+            data->server_data->clients_connected--;
         }
 
-        // char *ret;
-        if (strlen(buff) == 11 && strncmp("/shutdown", buff, 9) == 0)
+        else if (strncmp("/shutdown", buff, 9) == 0)
         {
             pthread_cancel(listenthr); // https://stackoverflow.com/questions/9763025/memory-leaked-with-pthread-cancel-itself
             printf("Shutting down.\n");
             close(c->connfd);
-            c->finished = true;
+            data->server_data->clients_connected--;
             free(p);
             free(buff);
             return NULL;
         }
-        printf("%s: %s\n", c->name, buff);
-        fflush(stdout);
+        else
+        {
+            printf("%s: %s\n", c->name, buff);
+            fflush(stdout);
+        }
     }
 }
 
 void *listener(void *arg)
 {
-    myclient *clients = (myclient *)arg;
+    server_data *data = (server_data *)arg;
 
     if (listen(sockfd, 10) != 0) // 10 is the maximum size of queue of listen()
     {
@@ -88,15 +108,23 @@ void *listener(void *arg)
     {
         // Accept the data packet from client and verification
         // int *connfd = malloc(sizeof(int));
-        clients[i].connfd = accept(sockfd, (SA *)&client, &peer_addr_size);
-        if (clients[i].connfd < 0)
+        data->clients[i].connfd = accept(sockfd, (SA *)&client, &peer_addr_size);
+        if (data->clients[i].connfd < 0)
         {
             perror("server accept failed...\n");
             continue;
         }
-        //printf("Client connected\n");
-
-        pthread_create(&(clients[i].thread), NULL, job, (void *)&clients[i]);
+        data->clients_connected++;
+        // printf("Client connected\n");
+        client_thread_data *client_thread_data = malloc(sizeof(client_thread_data));
+        if (client_thread_data == NULL)
+        {
+            perror("Client data error");
+            return NULL;
+        }
+        client_thread_data->id = i;
+        client_thread_data->server_data = data;
+        pthread_create(&(data->clients[i].thread), NULL, job, (void *)client_thread_data);
         ++i;
     }
 }
@@ -139,21 +167,21 @@ int main(int argc, char **argv)
     }
     printf("Socket successfully binded..\n");
     myclient *clients = malloc(sizeof(myclient) * CLIENTS);
-    pthread_create(&listenthr, NULL, listener, (void *)clients);
-    pthread_join(listenthr, NULL);
-    int counter = 0;
-    for (size_t i = 0; i < CLIENTS; i++)
-    {
-        if(clients[i].finished == false){
-            counter++;
-        }
-    }
-    printf("Server is shutting down. Waiting for %d clients to disconnected.", counter);
-     for (size_t i = 0; i < CLIENTS; i++)
-    {
-        pthread_join(clients[i].thread, NULL);
-    }
-    
+    server_data *data = malloc(sizeof(server_data) * CLIENTS);
 
+    atomic_int clients_connected = 0;
+    data->clients_connected = clients_connected;
+    data->clients = clients;
+
+    pthread_create(&listenthr, NULL, listener, (void *)data);
+    pthread_join(listenthr, NULL);
+
+    printf("Server is shutting down. Waiting for %d clients to disconnected.", clients_connected);
+
+    for (size_t i = 0; i < CLIENTS; i++)
+        pthread_join(clients[i].thread, NULL);
+
+    free(data);
+    free(clients);
     return EXIT_SUCCESS;
 }

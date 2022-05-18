@@ -1,6 +1,8 @@
 #include <netdb.h>
 #include <stdio.h>
 #include <stdlib.h>
+#include <unistd.h>
+#include <pthread.h>
 #include <string.h>
 #include <sys/socket.h>
 #define MAX 80
@@ -14,6 +16,7 @@ void func(int sockfd, char *name)
         bzero(buff, sizeof(buff));
         // scanf("%s", buff);
         int n = 0;
+        printf("> ");
         while ((buff[n++] = getchar()) != '\n')
             ;
         if (strncmp("/quit", buff, 5) == 0)
