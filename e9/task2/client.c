@@ -51,7 +51,7 @@ void* read_from_server(void * arg)
     client_data * cdata = (client_data * ) arg;
     for (;;)
     {
-        bzero(buff, sizeof(buff));
+        bzero(buff, strlen(buff));
         if(!recv(cdata->sockfd, buff, MAX, 0)){
             free(buff);
             return NULL;

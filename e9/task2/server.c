@@ -65,6 +65,7 @@ void *job(void *p)
 
     while (1)
     {
+        bzero(buff, strlen(buff));
         if (!recv(c->connfd, buff, MAX, 0))
         {
             atomic_fetch_sub(data->server_data->clients_connected,1);
@@ -91,10 +92,13 @@ void *job(void *p)
         // TODO testen
         char * message = malloc(sizeof(char) * MAX);
         sprintf(message, "%s: %s", c->name, buff);
+
         for (int i = 0; i < *data->server_data->clients_connected; i++) {
-            if (i != data->id && data->server_data->clients[i].connfd != NULL)
-                send(data->server_data->clients[i].connfd, buff, strlen(buff), 0);
-        }        
+            if (i != data->id && data->server_data->clients[i].connfd >= 0)
+                send(data->server_data->clients[i].connfd, message, strlen(message), 0);
+        }     
+
+        free(message);  
         
         printf("%s: %s", c->name, buff);
         fflush(stdout);    
