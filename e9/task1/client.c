@@ -24,6 +24,11 @@ void func(int sockfd, char *name)
             perror("schaden");
             return;
         }
+        if (strncmp("/shutdown", buff, 9) == 0)
+        {
+            send(sockfd, buff, sizeof(buff), 0);
+            return;
+        }
         send(sockfd, buff, sizeof(buff), 0);
         bzero(buff, sizeof(buff));
     }
