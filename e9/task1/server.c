@@ -183,7 +183,8 @@ int main(int argc, char **argv)
         pthread_join(clients[i].thread, NULL);
     //geat nt?
     // TODO es gib a dprintf wos an buffer in an socket sendet
-    free(clients); //
+    free(clients); 
     free(data);
+    close(sockfd); // close socked without SIGINT
     return EXIT_SUCCESS;
 }

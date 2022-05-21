@@ -1,12 +1,18 @@
-CFLAGS = -std=c11 -Wall -g -Wextra -Wpedantic -pthread #-fsanitize=address -Wconversion
+CFLAGS = -Wall -Wextra -pedantic -g -pthread -std=c11 -D_POSIX_C_SOURCE -D_BSD_SOURCE -D_DEFAULT_SOURCE#-std=c11 we removed -std=c11, in order to compile on zid
 
 .PHONY: all clean
-all: task1
+all: server client
 clean:
-	$(RM) task1
+	$(RM) server client 
 
-task1: task1.c
-	$(CC) $(CFLAGS) -o $@ $^
+server: server.c
+	$(CC) $(CFLAGS) -o $@ $^ -lrt
 
-val:
-	 valgrind --tool=memcheck --leak-check=full -s ./task1 8080
+client: client.c
+	$(CC) $(CFLAGS) -o $@ $^ -lrt
+
+val_server:
+	 valgrind --tool=memcheck --leak-check=full -s ./server 8080
+
+val_client:
+	 valgrind --tool=memcheck --leak-check=full -s ./client 8080 "amongus"
