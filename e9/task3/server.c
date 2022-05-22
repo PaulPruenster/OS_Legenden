@@ -93,25 +93,66 @@ void *job(void *arg)
         }
 
         char *message = malloc(sizeof(char) * MAX);
-        sprintf(message, "%s: %s", c->name, buff);
+        char buffcpy[MAX] = {0};
+        strcpy(buffcpy, buff);
 
-        int counter_active_clients = *data->server_data->clients_connected;
-        int i = 0;
-        while (counter_active_clients > 0 && i < CLIENTS)
+        char *word;
+        char *raw_message;
+        // get first word
+        word = strtok(buffcpy, " ");
+        if (!strcmp(word, "/w"))
         {
-            if (data->server_data->clients[i].isAlive)
+            printf("wisper detected\n");
+            // get name
+            word = strtok(NULL, " ");
+
+            // https://stackoverflow.com/questions/19724450/c-language-how-to-get-the-remaining-string-after-using-strtok-once
+            raw_message = word + strlen(word) + 1;
+
+            // dont send message if something is missing
+            if (word == NULL || raw_message == NULL)
             {
-                counter_active_clients--;
-                if (i != data->id)
-                    send(data->server_data->clients[i].connfd, message, strlen(message), 0);
+                continue;
             }
-            i++;
+            else
+            {
+                sprintf(message, "%s (whispers): %s", c->name, raw_message);
+                size_t max_clients = *data->server_data->clients_counter;
+                size_t i = 0;
+                while (i < max_clients)
+                {
+                    // send if name is the same as given by user
+                    if (data->server_data->clients[i].isAlive && !strcmp(data->server_data->clients[i].name, word))
+                    {
+                        send(data->server_data->clients[i].connfd, message, strlen(message), 0);
+                        break;
+                    }
+                    i++;
+                }
+            }
         }
+        else
+        {
 
-        free(message);
+            sprintf(message, "%s: %s", c->name, buff);
 
+            int counter_active_clients = *data->server_data->clients_connected;
+            int i = 0;
+            while (counter_active_clients > 0 && i < CLIENTS)
+            {
+                if (data->server_data->clients[i].isAlive)
+                {
+                    counter_active_clients--;
+                    if (i != data->id)
+                        send(data->server_data->clients[i].connfd, message, strlen(message), 0);
+                }
+                i++;
+            }
+        }
+        // print messae given from client
         printf("%s: %s", c->name, buff);
         fflush(stdout);
+        free(message);
     }
 }
 
