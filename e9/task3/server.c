@@ -102,7 +102,6 @@ void *job(void *arg)
         word = strtok(buffcpy, " ");
         if (!strcmp(word, "/w"))
         {
-            printf("wisper detected\n");
             // get name
             word = strtok(NULL, " ");
 
