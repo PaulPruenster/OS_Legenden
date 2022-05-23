@@ -28,16 +28,11 @@ void *write_to_server(void *arg)
         int n = 0;
         while ((buff[n++] = getchar()) != '\n')
             ;
+
+        //if /quit is the message, the clients disconnecteds
         if (strncmp("/quit", buff, 5) == 0)
         {
 
-            fflush(stdout);
-            pthread_cancel(read_thread);
-            return NULL;
-        }
-        if (strncmp("/shutdown", buff, 9) == 0)
-        {
-            send(cdata->sockfd, buff, strlen(buff), 0);
             fflush(stdout);
             pthread_cancel(read_thread);
             return NULL;
@@ -54,8 +49,10 @@ void *read_from_server(void *arg)
     while (1)
     {
         bzero(buff, strlen(buff));
-        if (!recv(cdata->sockfd, buff, MAX, 0))
+        if (!recv(cdata->sockfd, buff, MAX, 0)) {
+            pthread_cancel(write_thread);
             break;
+        }
         printf("%s", buff);
         fflush(stdout);
     }
@@ -70,14 +67,20 @@ int main(int argc, char **argv)
         return EXIT_FAILURE;
     }
     int port = atoi(argv[1]);
+    if (port < 0 || port > 65536)
+    {
+        fprintf(stderr, "Port: %d does not exist!", port);
+        return EXIT_FAILURE;
+    }
+
     int sockfd;
     struct sockaddr_in servaddr;
 
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd == -1)
     {
-        printf("socket creation failed...\n");
-        exit(0);
+        perror("socket creation failed...\n");
+        return EXIT_FAILURE;
     }
     else
         printf("Socket successfully created..\n");
@@ -90,8 +93,8 @@ int main(int argc, char **argv)
     // connect the client socket to server socket
     if (connect(sockfd, (struct sockaddr *)&servaddr, sizeof(servaddr)) != 0)
     {
-        printf("connection with the server failed...\n");
-        exit(0);
+        perror("connection with the server failed...\n");
+        return EXIT_FAILURE;
     }
     else
         printf("connected to the server..\n");

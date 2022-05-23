@@ -16,7 +16,6 @@
 #include <semaphore.h>
 
 #define MAX 1000
-#define SA struct sockaddr
 #define CLIENTS 100
 
 int port;
@@ -60,7 +59,17 @@ void *job(void *arg)
     myclient *c = &(data->server_data->clients[data->id]);
 
     char *buff = malloc(MAX * sizeof(char));
-    recv(c->connfd, buff, MAX, 0);
+    // first Message received is the name of the client
+    if (!recv(c->connfd, buff, MAX, 0))
+    {
+        atomic_fetch_sub(data->server_data->clients_connected, 1);
+        close(c->connfd);
+        c->isAlive = false;
+        free(arg);
+        free(buff);
+        return NULL;
+    }
+    // set name
     strcpy(c->name, buff); // destination, source
     printf("%s connected\n", c->name);
     fflush(stdout);
@@ -84,6 +93,7 @@ void *job(void *arg)
             c->isAlive = false;
             fflush(stdout);
             pthread_cancel(listenthr);
+            printf("%s disconnected\n", c->name);
             printf("Shutting down.\n");
             close(c->connfd);
             atomic_fetch_sub(data->server_data->clients_connected, 1);
@@ -100,6 +110,8 @@ void *job(void *arg)
         char *raw_message;
         // get first word
         word = strtok(buffcpy, " ");
+
+        // Check if user wants to wisper to someone
         if (!strcmp(word, "/w"))
         {
             // get name
@@ -110,9 +122,8 @@ void *job(void *arg)
 
             // dont send message if something is missing
             if (word == NULL || raw_message == NULL)
-            {
                 continue;
-            }
+
             else
             {
                 sprintf(message, "%s (whispers): %s", c->name, raw_message);
@@ -120,7 +131,7 @@ void *job(void *arg)
                 size_t i = 0;
                 while (i < max_clients)
                 {
-                    // send if name is the same as given by user
+                    // send if client is alive and name is the same as given by user
                     if (data->server_data->clients[i].isAlive && !strcmp(data->server_data->clients[i].name, word))
                     {
                         send(data->server_data->clients[i].connfd, message, strlen(message), 0);
@@ -130,9 +141,9 @@ void *job(void *arg)
                 }
             }
         }
+        // otherwise message will get send to everyone
         else
         {
-
             sprintf(message, "%s: %s", c->name, buff);
 
             int counter_active_clients = *data->server_data->clients_connected;
@@ -148,7 +159,7 @@ void *job(void *arg)
                 i++;
             }
         }
-        // print messae given from client
+        // print the message received from client
         printf("%s: %s", c->name, buff);
         fflush(stdout);
         free(message);
@@ -169,18 +180,16 @@ void *listener(void *arg)
     while (1)
     {
 
-        data->clients[i].connfd = accept(sockfd, (SA *)&client, &peer_addr_size);
-        data->clients[i].isAlive = true;
+        data->clients[i].connfd = accept(sockfd, (struct sockaddr *)&client, &peer_addr_size);
         if (data->clients[i].connfd < 0)
         {
-            data->clients[i].isAlive = false;
             perror("server accept failed...\n");
             continue;
         }
+        data->clients[i].isAlive = true;
         atomic_fetch_add(data->clients_connected, 1);
         atomic_fetch_add(data->clients_counter, 1);
 
-        // printf("Client connected\n");
         client_thread_data *c_data = calloc(1, sizeof(client_thread_data));
         if (c_data == NULL)
         {
@@ -202,6 +211,11 @@ int main(int argc, char **argv)
         return EXIT_FAILURE;
     }
     port = atoi(argv[1]);
+    if (port < 0 || port > 65536)
+    {
+        fprintf(stderr, "Port: %d does not exist!", port);
+        return EXIT_FAILURE;
+    }
     struct sigaction sa = {.sa_handler = handler};
     sigaction(SIGINT, &sa, 0);
 
@@ -225,7 +239,7 @@ int main(int argc, char **argv)
     setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &opt_val, sizeof opt_val);
 
     peer_addr_size = sizeof(struct sockaddr_in);
-    if (bind(sockfd, (SA *)&servaddr, sizeof(servaddr)) != 0)
+    if (bind(sockfd, (struct sockaddr *)&servaddr, sizeof(servaddr)) != 0)
     {
         perror("Binding failed...\n");
         return EXIT_FAILURE;
@@ -246,9 +260,12 @@ int main(int argc, char **argv)
 
     printf("Server is shutting down. Waiting for %d clients to disconnected.\n", clients_connected);
     fflush(stdout);
+
     size_t max_clients = *data->clients_counter;
     for (size_t i = 0; i < max_clients; i++)
+    {
         pthread_join(clients[i].thread, NULL);
+    }
 
     free(clients);
     free(data);
