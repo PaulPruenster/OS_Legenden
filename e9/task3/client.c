@@ -22,7 +22,7 @@ void *write_to_server(void *arg)
     client_data *cdata = (client_data *)arg;
     char buff[MAX] = {0};
     send(cdata->sockfd, cdata->name, strlen(cdata->name), 0);
-    for (;;)
+    while(1)
     {
         bzero(buff, sizeof(buff));
         int n = 0;
@@ -51,12 +51,11 @@ void *read_from_server(void *arg)
         bzero(buff, strlen(buff));
         if (!recv(cdata->sockfd, buff, MAX, 0)) {
             pthread_cancel(write_thread);
-            break;
+            return NULL;
         }
         printf("%s", buff);
         fflush(stdout);
     }
-    return NULL;
 }
 
 int main(int argc, char **argv)

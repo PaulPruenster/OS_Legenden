@@ -12,7 +12,7 @@ client: client.c
 	$(CC) $(CFLAGS) -o $@ $^ -lrt
 
 val_server:
-	 valgrind --tool=memcheck --leak-check=full -s ./server 8080
+	 valgrind --tool=memcheck --leak-check=full --show-leak-kinds=all -s ./server 8080
 
 val_client:
-	 valgrind --tool=memcheck --leak-check=full -s ./client 8080 "amongus"
+	 valgrind --tool=memcheck --leak-check=full  --show-leak-kinds=all -s ./client 8080 "amongus"
