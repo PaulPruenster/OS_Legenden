@@ -20,7 +20,6 @@ void func(int sockfd, char *name)
             ;
         if (strncmp("/quit", buff, 5) == 0)
         {
-            perror("schaden");
             return;
         }
         if (strncmp("/shutdown", buff, 9) == 0)
