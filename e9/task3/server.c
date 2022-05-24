@@ -59,7 +59,7 @@ void *job(void *arg)
     myclient *c = &(data->server_data->clients[data->id]);
 
     char *buff = malloc(MAX * sizeof(char));
-    // first Message received is the name of the client
+    // first message the server receives is the name of the client
     if (!recv(c->connfd, buff, MAX, 0))
     {
         atomic_fetch_sub(data->server_data->clients_connected, 1);
@@ -69,7 +69,7 @@ void *job(void *arg)
         free(buff);
         return NULL;
     }
-    // set name
+    // set name 
     strcpy(c->name, buff); // destination, source
     printf("%s connected\n", c->name);
     fflush(stdout);
@@ -111,7 +111,7 @@ void *job(void *arg)
         // get first word
         word = strtok(buffcpy, " ");
 
-        // Check if user wants to wisper to someone
+        // Check if user wants to whisper to someone
         if (!strcmp(word, "/w"))
         {
             // get name
@@ -120,7 +120,7 @@ void *job(void *arg)
             // https://stackoverflow.com/questions/19724450/c-language-how-to-get-the-remaining-string-after-using-strtok-once
             raw_message = word + strlen(word) + 1;
 
-            // dont send message if something is missing
+            // dont send the message if something is missing
             if (word == NULL || raw_message == NULL)
                 continue;
 
@@ -219,7 +219,7 @@ int main(int argc, char **argv)
     struct sigaction sa = {.sa_handler = handler};
     sigaction(SIGINT, &sa, 0);
 
-    // create socket and verificate it
+    // create socket and verifies it
     sockfd = socket(AF_INET, SOCK_STREAM, 0);
     if (sockfd == -1)
     {
@@ -234,7 +234,7 @@ int main(int argc, char **argv)
     servaddr.sin_addr.s_addr = htonl(INADDR_ANY);
     servaddr.sin_port = htons(port);
 
-    // cheat that server can be rerun after close
+    // prevent the os to lock the port and to be able to restart the server instantly 
     int opt_val = 1;
     setsockopt(sockfd, SOL_SOCKET, SO_REUSEADDR, &opt_val, sizeof opt_val);
 
@@ -244,7 +244,7 @@ int main(int argc, char **argv)
         perror("Binding failed...\n");
         return EXIT_FAILURE;
     }
-    printf("Socket successfully binded..\n");
+    printf("Socket successfully bound..\n");
     myclient *clients = calloc(CLIENTS, sizeof(myclient));
     server_data *data = calloc(1, sizeof(server_data));
 

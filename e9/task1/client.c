@@ -14,7 +14,6 @@ void func(int sockfd, char *name)
     for (;;)
     {
         bzero(buff, sizeof(buff));
-        // scanf("%s", buff);
         int n = 0;
         printf("> ");
         while ((buff[n++] = getchar()) != '\n')

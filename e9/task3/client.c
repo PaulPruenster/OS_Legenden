@@ -29,7 +29,7 @@ void *write_to_server(void *arg)
         while ((buff[n++] = getchar()) != '\n')
             ;
 
-        //if /quit is the message, the clients disconnecteds
+        //if /quit is the message, the clients disconnects
         if (strncmp("/quit", buff, 5) == 0)
         {
 
