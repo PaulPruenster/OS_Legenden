@@ -90,13 +90,13 @@ void *job(void *arg)
 
         if (strncmp("/shutdown", buff, 9) == 0)
         {
+            atomic_fetch_sub(data->server_data->clients_connected, 1);
             c->isAlive = false;
             fflush(stdout);
             pthread_cancel(listenthr);
             printf("%s disconnected\n", c->name);
             printf("Shutting down.\n");
             close(c->connfd);
-            atomic_fetch_sub(data->server_data->clients_connected, 1);
             free(arg);
             free(buff);
             return NULL;
