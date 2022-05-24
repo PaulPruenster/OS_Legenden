@@ -77,7 +77,6 @@ void *job(void *p)
 
         if (strncmp("/shutdown", buff, 9) == 0)
         {
-            printf("fahler\n");
             fflush(stdout);
             pthread_cancel(listenthr); 
             printf("Shutting down.\n");
