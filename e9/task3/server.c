@@ -114,6 +114,7 @@ void *job(void *arg)
         // Check if user wants to whisper to someone
         if (!strcmp(word, "/w"))
         {
+            // mutex to prevent user to disconnect 
             // get name
             word = strtok(NULL, " ");
 
@@ -159,6 +160,7 @@ void *job(void *arg)
                 i++;
             }
         }
+        // mutex unlock
         // print the message received from client
         printf("%s: %s", c->name, buff);
         fflush(stdout);
