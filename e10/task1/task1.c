@@ -7,9 +7,9 @@
 #include <pthread.h>
 #include <string.h>
 #include "allocator_tests.c"
+#include "membench.c"
 
 #define BLOCK_SIZE 1024
-
 
 struct node
 {
@@ -20,7 +20,7 @@ struct node
 
 typedef struct my_head_struct
 {
-    size_t size; // how many blocks
+    size_t size;        // how many blocks
     struct node *start; // first node
 } head;
 
@@ -31,21 +31,19 @@ void *my_malloc(size_t size)
 {
     // if required size is bigger then our BLOCK_SIZE
     if (size > BLOCK_SIZE)
-    {
         return NULL;
-    }
+
     pthread_mutex_lock(&mutex);
     // if there is no more free Blocks
-    if (((head *)storage)->start == NULL)
-    {
+    if (storage->start == NULL)
         return NULL;
-    }
+
     // get the free node
-    struct node *node = ((head *)storage)->start;
+    struct node *node = storage->start;
 
     // set next free node of head
     node->isFree = false;
-    ((head *)storage)->start = node->next;
+    storage->start = node->next;
 
     // return pointer of the memory
     pthread_mutex_unlock(&mutex);
@@ -58,8 +56,8 @@ void my_free(void *ptr)
     pthread_mutex_lock(&mutex);
 
     struct node *oldstart;
-
-    for (size_t i = 0; ((head *)storage)->size; i++)
+    // struct node *node = (struct node *)(((ptrdiff_t)storage + sizeof(head)));
+    for (size_t i = 0; i < ((head *)storage)->size / BLOCK_SIZE; i++)
     {
         struct node *node = (struct node*) (((ptrdiff_t)storage + sizeof(head) + (i * (sizeof(node)))));
 
@@ -101,7 +99,6 @@ void my_free(void *ptr)
             }
         }
     }
-    pthread_mutex_unlock(&mutex);
 }
 
 void my_allocator_init(size_t size)
@@ -132,11 +129,12 @@ void my_allocator_init(size_t size)
 
 void my_allocator_destroy(void)
 {
-    munmap(storage, ((head *)storage)->size * (sizeof(struct node)) + sizeof(head));
+    munmap(storage, storage->size);
     pthread_mutex_destroy(&mutex);
 }
 
 int main(void) {
-    test_free_list_allocator(); 
+    test_free_list_allocator();
+    run_membench_thread_local(my_allocator_init, my_allocator_destroy, my_malloc, my_free);
     return EXIT_SUCCESS;
 }

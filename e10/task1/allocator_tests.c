@@ -30,11 +30,8 @@ void test_free_list_allocator(void) {
 	void* const ptr3 = my_malloc(block_size);
 	memset(ptr3, 0xFF, block_size);
 	printf("ptr3: %p\n", ptr3);
-	printf("test");
 	assert(ptr1 == ptr3);
-	printf("test");
 	void* const ptr4 = my_malloc(block_size);
-	printf("f");
 	assert(ptr4 > ptr2);
 
 	// Figure out how large entire pool is

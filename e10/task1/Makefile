@@ -1,4 +1,4 @@
-CFLAGS = -Wall -Wextra -pedantic -pthread -g
+CFLAGS = -Wall -Wextra -pedantic -pthread -g -O3
 
 .PHONY: all clean
 all: task1
