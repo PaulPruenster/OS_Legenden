@@ -51,9 +51,11 @@ static void* thread_fn(void* arg) {
 	for(size_t i = 0; i < ctx->num_allocations; ++i) {
 		const size_t size = ctx->alloc_size * (1 + rand_r(&seed) % MAX_ALLOC_MULTIPLIER);
 		ptrs[i] = ctx->my_malloc(size);
+		//printf("%ld ", i);
 		assert(ptrs[i] != NULL);
 		memset(ptrs[i], 0xFF, size);
 	}
+
 
 	// Free ~50% of allocations
 	for(size_t i = 0; i < ctx->num_allocations; ++i) {
@@ -62,6 +64,7 @@ static void* thread_fn(void* arg) {
 			ptrs[i] = NULL;
 		}
 	}
+
 
 	// Re-allocate those ~50%
 	for(size_t i = 0; i < ctx->num_allocations; ++i) {
@@ -72,10 +75,12 @@ static void* thread_fn(void* arg) {
 		}
 	}
 
+
 	// Free all allocations
 	for(size_t i = 0; i < ctx->num_allocations; ++i) {
 		ctx->my_free(ptrs[i]);
 	}
+
 
 	// -----------------------------------
 	//    End of benchmarked section

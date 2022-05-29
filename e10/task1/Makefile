@@ -8,6 +8,9 @@ clean:
 task1: task1.c
 	$(CC) $(CFLAGS) -o $@ $^
 
+test: test.c
+	$(CC) $(CFLAGS) -o $@ $^
+
 task1-optimized2: task1.c
 	$(CC) $(CFLAGS) -o2 -o $@ $^ 
 
