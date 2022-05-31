@@ -25,8 +25,8 @@ typedef struct my_head_struct
     struct node *start; // first node
 } head;
 
-pthread_mutex_t mutex;
-head *storage;
+pthread_mutex_t mutex;    // remove _Thread_local for task1
+head *storage;            // remove _Thread_local for task1
 
 void *my_malloc(size_t size)
 {
@@ -145,5 +145,6 @@ int main(void)
    
     // test_free_list_allocator();
     run_membench_global(my_allocator_init, my_allocator_destroy, my_malloc, my_free);
+    //run_membench_thread_local(my_allocator_init, my_allocator_destroy, my_malloc, my_free);
     return EXIT_SUCCESS;
 }

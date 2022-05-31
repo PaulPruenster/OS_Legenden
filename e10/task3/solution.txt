@@ -1,0 +1,28 @@
+task1 with _Thread_local:
+1 thread(s), 1000 allocations of size 256 - 1024 byte per thread. Avg time per thread:
+        System: 0.41 ms
+        Custom: 1.30 ms
+10 thread(s), 1000 allocations of size 256 - 1024 byte per thread. Avg time per thread:
+        System: 0.34 ms
+        Custom: 1.61 ms
+50 thread(s), 1000 allocations of size 256 - 1024 byte per thread. Avg time per thread:
+        System: 0.22 ms
+        Custom: 11.73 ms
+100 thread(s), 1000 allocations of size 32 - 128 byte per thread. Avg time per thread:
+        System: 0.27 ms
+        Custom: 19.81 ms
+
+
+without _Thread_local:
+1 thread(s), 1000 allocations of size 256 - 1024 byte per thread. Avg time per thread:
+        System: 0.23 ms
+        Custom: 1.29 ms
+10 thread(s), 1000 allocations of size 256 - 1024 byte per thread. Avg time per thread:
+        System: 0.26 ms
+        Custom: 112.68 ms
+50 thread(s), 1000 allocations of size 256 - 1024 byte per thread. Avg time per thread:
+        System: 0.40 ms
+        Custom: 1481.51 ms
+100 thread(s), 1000 allocations of size 32 - 128 byte per thread. Avg time per thread:
+        System: 0.24 ms
+        Custom: 7666.74 ms
