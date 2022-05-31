@@ -25,8 +25,8 @@ typedef struct my_head_struct
     struct node *start; // first node
 } head;
 
-pthread_mutex_t mutex;    // remove _Thread_local for task1
-head *storage;            // remove _Thread_local for task1
+pthread_mutex_t mutex;        // for task 3 we don't need any mutex, because every thread has their own pool
+_Thread_local head *storage;  // remove _Thread_local for task1
 
 void *my_malloc(size_t size)
 {
