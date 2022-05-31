@@ -15,18 +15,18 @@
 
 struct node
 {
-    char* memory;
+    char *memory;
     size_t size;
     struct node *next; // pointer to next element
     struct node *prev; // pointer to the previous element
-    atomic_bool isFree; 
+    atomic_bool isFree;
 };
 
 typedef struct my_head_struct
 {
     size_t size;        // how many blocks
     struct node *start; // first node
-    size_t free_space;  // indicates how much storage/bytes are left. 
+    size_t free_space;  // indicates how much storage/bytes are left.
 
 } head;
 
@@ -45,20 +45,25 @@ void *my_malloc(size_t size)
 
     // get the free node
     struct node *freeblock = storage->start;
-    while (1) {
+    while (freeblock != NULL)
+    {
         if (freeblock->isFree && freeblock->size >= size)
             break;
-        node = 
+        freeblock = freeblock->next;
     }
+    if (freeblock == NULL) // no free space left
+        return NULL;
 
+    // split the free pace node into two and return the reseved one
+    struct node *allocated = freeblock;
 
-    //  set next free node of head
-    //storage->start = node->next;
+    freeblock->memory += size; //????
+    storage->free_space -= size;
 
     pthread_mutex_unlock(&mutex);
 
     // return pointer of the memory
-    return node->memory;
+    return allocated->memory;
 }
 
 void my_free(void *ptr)
@@ -128,9 +133,9 @@ void my_allocator_init(size_t size)
         perror("mmap failed");
         exit(EXIT_FAILURE);
     }
-    
+
     storage->size = size;
-    storage->free_space = size - sizeof(head); 
+    storage->free_space = size - sizeof(head);
     storage->start = (struct node *)((ptrdiff_t)storage + sizeof(head));
     storage->start->size = size - sizeof(head);
     storage->start->isFree = true;
@@ -145,7 +150,7 @@ void my_allocator_destroy(void)
 
 int main(void)
 {
-   
+
     // test_free_list_allocator();
     run_membench_global(my_allocator_init, my_allocator_destroy, my_malloc, my_free);
     return EXIT_SUCCESS;
