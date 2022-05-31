@@ -13,6 +13,22 @@
 
 #define BLOCK_SIZE 1024
 
+/*
+DISCLAIMER: this solution does not work, but we spend a couple of hours trying to fix it.
+
+ Our idea was to create a double linked list, which points to every node/element in the memory.
+
+ malloc: find the (first) free node of the list, where the given size fits in. Afterwards we split the node
+         into to separates notes. One remains still free and the other contains the new malloced data.
+
+ free:   we are trying to find the node, which stores the given address. Afterwards we check the direct neighbours
+         in order to merge free blocks. We don't have to check any other notes, because we can assume that they
+         are already merged if possible.
+
+*/
+
+
+
 struct node {
     char *memory;
     size_t size;
@@ -36,7 +52,6 @@ void *my_malloc(size_t size) {
     if (size > storage->free_space) {
         return NULL;
     }
-    char a[size - sizeof(struct node)]; // create a array/pointer, which consumes the given memory
     pthread_mutex_lock(&mutex);
 
     // get the free node
@@ -52,17 +67,19 @@ void *my_malloc(size_t size) {
         return NULL;
     }
     // split the free pace node into two and return the reseved one
-    struct node *allocated = freeblock;
-    allocated->size = size;
-    allocated->next = freeblock;
-    allocated->prev = freeblock->prev;
-    freeblock->memory += size + sizeof(struct node); //????
-    storage->free_space -= (size + sizeof(struct node));
+    struct node allocated = {0};
+    allocated.size = size;
+    allocated.next = freeblock;
+    allocated.prev = freeblock->prev;
+    allocated.isFree = false;
+    // verschieben um die allozierte memory
+    freeblock->memory += sizeof(struct node) + size; //????
+    storage->free_space -= (size + (ptrdiff_t) freeblock + sizeof(struct node));
 
     pthread_mutex_unlock(&mutex);
 
     // return pointer of the memory
-    return allocated->memory;
+    return allocated.memory;
 }
 
 void merge_Block(struct node *first, struct node *next) {
@@ -89,13 +106,12 @@ void my_free(void *ptr) {
 
     // merge neighbours if they are both free
     if (freeblock->prev->isFree) {
-        // merge
         merge_Block(freeblock->prev, freeblock);
     }
     if (freeblock->next->isFree) {
-        // merge
         merge_Block(freeblock, freeblock->next);
     }
+
     pthread_mutex_unlock(&mutex);
     return;
 }
