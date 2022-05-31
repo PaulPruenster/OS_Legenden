@@ -13,20 +13,6 @@
 
 #define BLOCK_SIZE 1024
 
-/*
-DISCLAIMER: this solution does not work, but we spend a couple of hours trying to fix it.
-
- Our idea was to create a double linked list, which points to every node/element in the memory.
-
- malloc: find the (first) free node of the list, where the given size fits in. Afterwards we split the node
-         into to separates notes. One remains still free and the other contains the new malloced data.
-
- free:   we are trying to find the node, which stores the given address. Afterwards we check the direct neighbours
-         in order to merge free blocks. We don't have to check any other notes, because we can assume that they
-         are already merged if possible.
-
-*/
-
 struct node
 {
     char *memory;
@@ -52,8 +38,8 @@ void *my_malloc(size_t size)
     // if required size is bigger then our free space left
     pthread_mutex_lock(&mutex);
     static int a = 1;
-    printf("malloc: %d, size: %d\n", a++, size);
-    // get the free node
+    // printf("malloc: %d, size: %d\n", a++, size);
+    //  get the free node
     struct node *freeblock = storage->start;
     size_t minsize = storage->size + 1;
     struct node *minblock = NULL;
@@ -104,7 +90,8 @@ void *my_malloc(size_t size)
         // freeblock->memory += sizeof(struct node) + size; //????
         storage->free_space -= (size + (ptrdiff_t)sizeof(struct node));
     }
-    else{
+    else
+    {
         minblock->size = size;
         minblock->isFree = false;
     }
@@ -112,7 +99,7 @@ void *my_malloc(size_t size)
     pthread_mutex_unlock(&mutex);
 
     // return pointer of the memory
-    printlist();
+    // printlist();
     return minblock->memory;
 }
 
@@ -120,7 +107,8 @@ void merge_Block(struct node *first, struct node *next)
 {
     first->size += next->size + sizeof(struct node);
     first->next = next->next;
-    if(next->next != NULL){
+    if (next->next != NULL)
+    {
         next->next->prev = first;
     }
 }
@@ -129,7 +117,7 @@ void my_free(void *ptr)
 {
     pthread_mutex_lock(&mutex);
     static int b = 1;
-    printf("free:%d\n", b++);
+    // printf("free:%d\n", b++);
     struct node *freeblock = storage->start;
     while (freeblock != NULL)
     {
@@ -149,13 +137,13 @@ void my_free(void *ptr)
     // merge neighbours if they are both free
     if (freeblock->prev != NULL && freeblock->prev->isFree)
     {
-        printf("merge prev\n");
+        // printf("merge prev\n");
         merge_Block(freeblock->prev, freeblock);
         freeblock = freeblock->prev;
     }
     if (freeblock->next != NULL && freeblock->next->isFree)
     {
-        printf("merge next\n");
+        // printf("merge next\n");
         merge_Block(freeblock, freeblock->next);
     }
     printlist();
