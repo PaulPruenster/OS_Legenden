@@ -7,9 +7,8 @@
 #include <pthread.h>
 #include <string.h>
 
-// TODO: use header files
-#include "allocator_tests.c"
-#include "membench.c"
+#include "allocator_tests.h"
+#include "membench.h"
 
 #define BLOCK_SIZE 1024
 
@@ -25,8 +24,8 @@ typedef struct my_head_struct
     struct node *start; // first node
 } head;
 
-pthread_mutex_t mutex;        // for task 3 we don't need any mutex, because every thread has their own pool
-_Thread_local head *storage;  // remove _Thread_local for task1
+pthread_mutex_t mutex;       // for task 3 we don't need any mutex, because every thread has their own pool
+_Thread_local head *storage; // remove _Thread_local for task1
 
 void *my_malloc(size_t size)
 {
@@ -45,7 +44,6 @@ void *my_malloc(size_t size)
     }
     // get the free node
     struct node *node = ((head *)storage)->start;
-
 
     //  set next free node of head
     ((head *)storage)->start = node->next;
@@ -142,9 +140,9 @@ void my_allocator_destroy(void)
 }
 int main(void)
 {
-   
+
     // test_free_list_allocator();
     run_membench_global(my_allocator_init, my_allocator_destroy, my_malloc, my_free);
-    //run_membench_thread_local(my_allocator_init, my_allocator_destroy, my_malloc, my_free);
+    // run_membench_thread_local(my_allocator_init, my_allocator_destroy, my_malloc, my_free);
     return EXIT_SUCCESS;
 }

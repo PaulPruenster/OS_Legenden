@@ -6,10 +6,9 @@
 #include <stdbool.h>
 #include <pthread.h>
 #include <string.h>
-#include "allocator_tests.c"
+#include "allocator_tests.h"
 
 #define BLOCK_SIZE 1024
-
 
 struct node
 {
@@ -20,7 +19,7 @@ struct node
 
 typedef struct my_head_struct
 {
-    size_t size; // how many blocks
+    size_t size;        // how many blocks
     struct node *start; // first node
 } head;
 
@@ -61,11 +60,11 @@ void my_free(void *ptr)
 
     for (size_t i = 0; ((head *)storage)->size; i++)
     {
-        struct node *node = (struct node*) (((ptrdiff_t)storage + sizeof(head) + (i * (sizeof(node)))));
+        struct node *node = (struct node *)(((ptrdiff_t)storage + sizeof(head) + (i * (sizeof(node)))));
 
         if (node->memory == ptr && !node->isFree)
         {
-            //memset(node->memory, (BLOCK_SIZE - 16), 0);
+            // memset(node->memory, (BLOCK_SIZE - 16), 0);
             oldstart = ((head *)storage)->start;
             if (oldstart == NULL)
             {
@@ -92,7 +91,7 @@ void my_free(void *ptr)
                 }
                 if (oldstart > node)
                 {
-                    oldstart-> next = node;
+                    oldstart->next = node;
                     node->next = NULL;
                     pthread_mutex_unlock(&mutex);
                     return;
@@ -112,7 +111,7 @@ void my_allocator_init(size_t size)
         exit(EXIT_FAILURE);
     }
     pthread_mutex_init(&mutex, NULL);
-    storage  = (head*)mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_ANONYMOUS | MAP_PRIVATE, -1, 0);
+    storage = (head *)mmap(NULL, size, PROT_READ | PROT_WRITE, MAP_ANONYMOUS | MAP_PRIVATE, -1, 0);
 
     if (storage == MAP_FAILED)
     {
@@ -120,14 +119,14 @@ void my_allocator_init(size_t size)
         exit(EXIT_FAILURE);
     }
     storage->size = size;
-    storage->start = (struct node*) ((ptrdiff_t)storage + sizeof(head));
+    storage->start = (struct node *)((ptrdiff_t)storage + sizeof(head));
 
     for (size_t i = 0; i < ((size - sizeof(head)) / BLOCK_SIZE); i++)
     {
-        ((struct node *)((ptrdiff_t)storage + sizeof(head) + (i * sizeof(struct node))))->next = (struct node*)((ptrdiff_t)storage + sizeof(head) + ((i + 1) * (sizeof(struct node))));
+        ((struct node *)((ptrdiff_t)storage + sizeof(head) + (i * sizeof(struct node))))->next = (struct node *)((ptrdiff_t)storage + sizeof(head) + ((i + 1) * (sizeof(struct node))));
         ((struct node *)((ptrdiff_t)storage + sizeof(head) + (i * sizeof(struct node))))->isFree = true;
     }
-    ((struct node *)((ptrdiff_t)storage + sizeof(head) + ((size / BLOCK_SIZE)-1 * (sizeof(struct node)))))->next = NULL;
+    ((struct node *)((ptrdiff_t)storage + sizeof(head) + ((size / BLOCK_SIZE) - 1 * (sizeof(struct node)))))->next = NULL;
 }
 
 void my_allocator_destroy(void)
@@ -136,7 +135,8 @@ void my_allocator_destroy(void)
     pthread_mutex_destroy(&mutex);
 }
 
-int main(void) {
-    test_free_list_allocator(); 
+int main(void)
+{
+    test_free_list_allocator();
     return EXIT_SUCCESS;
 }
