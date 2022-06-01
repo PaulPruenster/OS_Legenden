@@ -7,9 +7,8 @@
 #include <pthread.h>
 #include <string.h>
 
-// TODO: use header files
-#include "allocator_tests.c"
-#include "membench.c"
+#include "allocator_tests.h"
+#include "membench.h"
 
 #define BLOCK_SIZE 1024
 
@@ -146,7 +145,7 @@ void my_free(void *ptr)
         // printf("merge next\n");
         merge_Block(freeblock, freeblock->next);
     }
-    printlist();
+    // printlist();
 
     pthread_mutex_unlock(&mutex);
     return;

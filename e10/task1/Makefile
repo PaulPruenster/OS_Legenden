@@ -5,16 +5,16 @@ all: task1
 clean:
 	$(RM) task1 task1.o task1-optimized2 task1-optimized3
 
-task1: task1.c
+task1: task1.c membench.o allocator_tests.o
 	$(CC) $(CFLAGS) -o $@ $^
 
-test: test.c
+test: test.c membench.o allocator_tests.o
 	$(CC) $(CFLAGS) -o $@ $^
 
-task1-optimized2: task1.c
+task1-optimized2: task1.c membench.o allocator_tests.o
 	$(CC) $(CFLAGS) -o2 -o $@ $^ 
 
-task1-optimized3: task1.c
+task1-optimized3: task1.c membench.o allocator_tests.o
 	$(CC) $(CFLAGS) -o3 -o $@ $^ 
 
 val:
