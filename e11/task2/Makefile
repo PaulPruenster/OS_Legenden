@@ -3,11 +3,11 @@ CFLAGS = -Wall -Wextra -g
 lib = tripple.so cube.so abs.so
 
 .PHONY: all clean
-all: task2  $(lib)
+all: map_number  $(lib)
 clean:
-	$(RM) task2 *.so
+	$(RM) map_number *.so
 
-task2: task2.c
+map_number: map_number.c
 	$(CC) $(CFLAGS) -o $@ $^ -ldl
 
 %.so: %.c
