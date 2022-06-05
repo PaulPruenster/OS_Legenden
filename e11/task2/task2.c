@@ -2,7 +2,7 @@
 #include <dlfcn.h>
 #include <stdio.h>
 #include <stdlib.h>
-// ttps://jameshfisher.com/2017/08/24/dlopen/
+// source: https://jameshfisher.com/2017/08/24/dlopen/
 typedef int plugin_func(int);
 
 int main(int argc, char *argv[]) {
