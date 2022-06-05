@@ -12,5 +12,17 @@
 Then:
 
 the programs sizes are: 
-my_program 16744
+my_program 16784
 some_program 16792
+
+Questions: 
+What is the difference between dynamic and static linking?
+The main difference is the following: 
+        static linking: 
+                All the code from the library gets copied into the (one) binary/executable, which means
+                the binary could get quite bulky, but every used library is part of the binary/executable
+
+        dynamic linking: 
+                Instead of copying the code into the existing code base, the name of external 
+                libraries (shared libraries) are placed in the final executable/binary file. So 
+                only a reference is created. 

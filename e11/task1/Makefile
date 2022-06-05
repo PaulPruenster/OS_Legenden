@@ -1,5 +1,5 @@
 .PHONY: all clean
-all: some_library
+all: some_library my_program
 clean:
 	$(RM) some_library.so some_library.o my_program
 
