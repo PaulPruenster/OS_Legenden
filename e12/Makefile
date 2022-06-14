@@ -14,5 +14,8 @@ restaurant-optimized2: restaurant.c
 restaurant-optimized3: restaurant.c
 	$(CC) $(CFLAGS) -o3 -o $@ $^ 
 
-val:
+val0:
+	valgrind --tool=memcheck --leak-check=full --show-leak-kinds=all ./restaurant 0 5 3
+
+val1:
 	valgrind --tool=memcheck --leak-check=full --show-leak-kinds=all ./restaurant 1 5 3
