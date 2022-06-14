@@ -174,7 +174,7 @@ int main(int argc, char **argv)
     srand(time(NULL));
 
     pthread_t cooks[number_cooks];
-    for (int i; i < number_cooks; i++)
+    for (int i = 0; i < number_cooks; i++)
     {
         int *p = malloc(sizeof(int *));
         *p = i;
