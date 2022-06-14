@@ -5,7 +5,7 @@ all: restaurant
 clean:
 	$(RM) restaurant restaurant.o restaurant-optimized2 restaurant-optimized3
 
-restaurant: restaurant.c
+restaurant: restaurant.c myqueue.h
 	$(CC) $(CFLAGS) -o $@ $^
 
 restaurant-optimized2: restaurant.c
@@ -15,4 +15,4 @@ restaurant-optimized3: restaurant.c
 	$(CC) $(CFLAGS) -o3 -o $@ $^ 
 
 val:
-	valgrind --tool=memcheck ./restaurant 1 5 3
+	valgrind --tool=memcheck --leak-check=full --show-leak-kinds=all ./restaurant 1 5 3
