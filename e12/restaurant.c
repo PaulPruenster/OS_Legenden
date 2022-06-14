@@ -40,6 +40,7 @@ void *cook_thread(void *vargp)
 
         if (val->value == -1)
         {
+            free(val);
             free(vargp);
             return NULL;
         }
