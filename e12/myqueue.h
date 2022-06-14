@@ -31,9 +31,7 @@ static bool myqueue_is_empty(myqueue *q)
 
 static void myqueue_push(myqueue *q, struct myqueue_entry *values)
 {
-  struct myqueue_entry *entry = malloc(sizeof(struct myqueue_entry));
-  entry = values;
-  STAILQ_INSERT_TAIL(q, entry, entries);
+  STAILQ_INSERT_TAIL(q, values, entries);
 }
 
 static void *myqueue_pop(myqueue *q)

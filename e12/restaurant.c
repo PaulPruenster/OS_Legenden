@@ -18,7 +18,6 @@ atomic_int client_counter;
 atomic_int order_counter;
 myqueue *q;
 
-int STOP = 1;
 
 int notification = 0;
 
@@ -28,7 +27,7 @@ void *cook_thread(void *vargp)
     int id = 0;
     id = *(int *)vargp;
     myqueue_entry *val = {0};
-    while (STOP)
+    while (1)
     {
         pthread_mutex_lock(&mutex);
         // Loop is needed, because pthread_cond_wait does randomly continue sometimes
@@ -38,6 +37,13 @@ void *cook_thread(void *vargp)
         }
         val = myqueue_pop(q);
         pthread_mutex_unlock(&mutex);
+
+        if (val->value == -1)
+        {
+            free(vargp);
+            return NULL;
+        }
+
         printf("Cook %d is preparing order %d\n", id, val->value);
         int rand_time = (rand() % (500 - 100 + 1)) + 100;
         usleep(rand_time * 1000);
@@ -76,9 +82,11 @@ void *guest_function(void *arg)
     clock_gettime(CLOCK_MONOTONIC, &ts);
     uint64_t ms1 = ts.tv_sec * 1e3 + ts.tv_nsec / 1e6;
     int id = *(int *)arg;
+    free(arg);
     int order_id = order_counter++;
 
     myqueue_entry *entry = malloc(sizeof(myqueue_entry));
+
     entry->value = order_id;
     entry->client_notification = NULL;
     entry->client_mutex = NULL;
@@ -107,7 +115,7 @@ void *guest_function(void *arg)
             pthread_cond_wait(entry->client_notification, entry->client_mutex);
         }
         pthread_mutex_unlock(entry->client_mutex);
-        counter=-1;
+        counter = -1;
         clock_gettime(CLOCK_MONOTONIC, &ts);
         uint64_t ms2 = ts.tv_sec * 1e3 + ts.tv_nsec / 1e6;
         printf("Guest %d has picked up order %d after %ld ms\n", id, order_id, ms2 - ms1);
@@ -149,7 +157,6 @@ void *guest_function(void *arg)
         }
     }
     free(entry);
-    free(arg);
     return NULL;
 }
 
@@ -200,16 +207,27 @@ int main(int argc, char **argv)
         total_sum += a;
     }
 
-    STOP = 0;
+    //STOP = 0;
+    for(int i = 0; i < number_cooks;i++){
+        myqueue_entry *entry = malloc(sizeof(myqueue_entry));
+        entry->value = -1;
+        entry->client_notification = NULL;
+        entry->client_mutex = NULL;
+        pthread_mutex_lock(&mutex);
+        myqueue_push(q, entry);
+        pthread_cond_signal(&cook_cond);
+        pthread_mutex_unlock(&mutex);
+    }
 
     for (int i = 0; i < number_cooks; i++)
     {
-        pthread_cancel(cooks[i]);
-        // pthread_join(cooks[i],NULL);
+        //pthread_cancel(cooks[i]);
+        pthread_join(cooks[i],NULL);
     }
     pthread_cond_destroy(&cook_cond);
     pthread_mutex_destroy(&mutex);
     printf("All guests habe veen served with an average wait time of %ld ms\n", (total_sum / number_guest));
+
     free(q);
     return EXIT_SUCCESS;
 }
