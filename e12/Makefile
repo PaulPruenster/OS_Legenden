@@ -1,4 +1,4 @@
-CFLAGS = -Wall -Wextra -pedantic -pthread -g
+CFLAGS = -Wall -Wextra -Wpedantic -pthread -g
 
 .PHONY: all clean
 all: restaurant
