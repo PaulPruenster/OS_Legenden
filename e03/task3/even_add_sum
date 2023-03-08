@@ -1,0 +1,28 @@
+#!/bin/bash
+
+$(make clean)
+$(make all)
+
+sum_odd=0
+sum_even=0
+for i in "$@"
+do
+	$(./even $i)
+	return_value=$?
+	if [ $return_value -eq 1 ]
+	then
+		((sum_odd+=$i))
+	elif [ $return_value -eq 0 ]
+	then
+		((sum_even+=$i))
+	elif [ $return_value -eq 3 ]
+        then
+                echo "error: only numbers allowed"
+	elif [ $return_value -eq 2 ]
+	then
+		echo "error: not enove aguments"
+	fi
+done
+
+echo "sum of even numbers: $sum_even"
+echo "sum of odd numbers: $sum_odd"

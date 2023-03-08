@@ -1,0 +1,16 @@
+Set environment variable:
+    MY_ENV_VAR=Hallo
+
+Set environment variable for one command:
+    env MY_ENV_VAR=value ./read_my_env_var
+
+Unset environment variable:
+    unset MY_ENV_VAR
+
+Print environment variable:
+    echo $MY_ENV_VAR
+
+PATH:
+    The PATH environment variable is an important security control. 
+    It specifies the directories to be searched to find a command.
+"echo $PATH" to see PATH

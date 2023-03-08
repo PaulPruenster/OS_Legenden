@@ -1,0 +1,9 @@
+CTRL + c:
+    it does not stop the prozess, it does print ^C, and the handler gets SIGINT.
+
+SIGKILL:
+    The SIGKILL is used for immediate termination of a process. This signal cannot be ignored or blocked.
+    The process will be terminated along with its threads (if any).
+
+SIGTERM:
+    The SIGTERM can also be referred as soft kill because the process that receives the SIGTERM signal may choose to ignore it.

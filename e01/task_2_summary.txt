@@ -1,0 +1,101 @@
+Matthias Ebner 12.03.2022
+
+connect to server:
+	ssh -X -l csaz9531 zid-gpl.uibk.ac.at	
+pwd:
+	Print the full filename of the current working directory.
+	ex.
+	pwd
+	"/home/csaz9531/Documents/Semester2/betriebsysteme/Aufgaben/exercise01/list_args"
+
+ls:
+	List  information  about  the  FILEs.
+	-a	to not ignore entries starting with .
+	ex.
+	ls
+	"task_2_summary.txt"
+	ls -a
+	".  ..  task_2_summary.txt"
+
+cd:
+	can be used to navigate between diretorys
+
+touch:
+	Update the access and modification times of each FILE to the current time. Is often used to creat a new file, if the file argument does not exist.
+	-c	Does not creat a new file
+	-a	to only change the access-time
+	-m	to only change the modifikation date
+	ex.
+	touch task_2_summary.txt
+
+mkdir:
+	 Create the DIRECTORY(ies), if they do not already exist.
+	-v 	creats message for each created directory
+	-p	make parent directories as needed
+	ex.
+	mkdir task2
+
+cp:
+	Copy SOURCE to DEST, or multiple SOURCE(s) to DIRECTORY.
+	 --attributes-only	don't copy the file data, just the attributes
+
+mv:	mv [OPTION]... [-T] SOURCE DEST
+	 Rename SOURCE to DEST, or move SOURCE(s) to DIRECTORY. If the destination does not exist source will be renamed, else source will be
+	moved to destination(files and directories)
+	-f	will not ask bevor overwriting
+	-n	will not overwrite file
+	ex.
+	mv task2 taks_2
+
+rm:
+	rm removes each specified file. can also be used to remove directorys
+	-r 	to remove a directory and every file in it
+	-i	asks bevor deleting a file
+	ex.
+	rm -r task_2
+
+nano:
+	nano is a texteditor, no mouse can be used...
+	^o to save changes
+	^x to exit(will ask to save bevor closing, if there is a unsaved change)
+	^w to search for text
+	^g for help
+
+man:
+	man is the system's manual pager. can be used to find manual pages for commands if more information is needed
+	ex.
+	man nano
+
+intro:
+	introduction to user commands. Section  1  of  the manual describes user commands and tools, for
+	example,  file  manipulation  tools,   shells,   compilers,   web
+	browsers, file and image viewers and editors, and so on.
+
+man man-pages:
+	 man-pages - conventions for writing Linux man pages.The manual pages have have 8 Sections:
+	 	- Commands
+		- System calls
+		- Library calls
+		- Special files (devices)
+		- File formats and conventions
+		- Games
+		- Overview, conventions, and miscellaneous
+
+man file-hierarchy:
+	file-hierarchy - File system hierarchy overview
+	GENERAL STRUCTURE:
+	-  /boot	The boot partition used for bringing up the system.
+	- /etc		System-specific configuration.
+	- /home		The location for normal user's home directories.
+	- /root		The home directory of the root user.
+	- /srv		The place to store general server payload, managed by the
+           		administrator.
+	- /tmp		The place for small temporary files.
+	- ...
+
+man 3 printf:
+	will give you the manual for the C library routine printf.
+
+man printf:
+	If you don't specify a section number, you'll get the command from the first section that contains a match.
+	Same as "man 1 printf"

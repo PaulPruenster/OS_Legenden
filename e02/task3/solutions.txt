@@ -1,0 +1,7 @@
+Is it possible to get the return-value from the main function with
+
+./even "Hallo"
+echo $?
+3
+
+

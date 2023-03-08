@@ -1,0 +1,20 @@
+get return value from main with echo $? aften executing even
+
+command1 && command2:
+    command2 will be executed if (and only if) command1 returns exit status zero
+
+command1 ; command2:
+    both command1 and command2 will be executed regardless. The semicolon allows you to type many commands on one line.
+
+command1 || command2:
+    command2 will be executed if (and only if) command1 fails
+
+https://stackoverflow.com/questions/2175405/what-is-bin-true
+/bin/true is a command that returns 0 (a truth value in the shell).
+
+Its purpose is to use in places in a shell script where you would normally use a literal such as "true" in a programming language, 
+but where the shell will only take a command to run.
+
+/bin/false is the opposite that returns non-zero (a false value in the shell).
+
+to run the executable, u have to provide the path to the command

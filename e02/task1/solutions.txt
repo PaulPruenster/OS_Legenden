@@ -1,0 +1,11 @@
+export MY_ENV_VAR=HALLO
+
+echo $MY_ENV_VAR
+HALLO
+
+
+unset MY_ENV_VAR
+
+
+
+export MY_ENV_VAR=HALLO ./read_my_env_var
